@@ -79,19 +79,20 @@ export class App {
     camera.lowerRadiusLimit = 0.2;
     camera.upperRadiusLimit = 10;
     camera.minZ = 0.1;
-    camera.attachControl(canvas, true);
+    // camera.attachControl(canvas, true);
 
     const hemLight: HemisphericLight = new HemisphericLight(
-      "light1",
+      "hemLight",
       new Vector3(1, 1, 0),
       scene
     );
     hemLight.intensity = 0.5;
     const dirLight = new DirectionalLight(
-      "light2",
-      Vector3.Zero().subtract(new Vector3(1, 1, 1)),
+      "dirLight",
+      Vector3.Zero().subtract(new Vector3(1, 2, 1)),
       scene
     );
+    dirLight.position = new Vector3(5, 5, 5);
     dirLight.shadowEnabled = true;
     dirLight.intensity = 1;
 
@@ -99,11 +100,10 @@ export class App {
       width: 10,
       height: 10,
     });
-    const material = new ShadowOnlyMaterial("mat1", scene);
+    const material = new ShadowOnlyMaterial("shadowOnlyMaterial", scene);
     material.activeLight = dirLight;
     ground.material = material;
     ground.receiveShadows = true;
-    ground.checkCollisions = true;
     ground.physicsImpostor = new PhysicsImpostor(
       ground,
       PhysicsImpostor.BoxImpostor,
@@ -112,11 +112,10 @@ export class App {
     );
 
     const shadowGenerator = new ShadowGenerator(1024, dirLight);
-    // shadowGenerator.usePoissonSampling = true;
-    // shadowGenerator.bias = 0.00001;
+    shadowGenerator.usePoissonSampling = true;
+    shadowGenerator.bias = 0.0001;
     shadowGenerator.useBlurExponentialShadowMap = true;
-    shadowGenerator.blurScale = 2;
-    shadowGenerator.setDarkness(0.2);
+    shadowGenerator.blurScale = 15;
 
     let die: AbstractMesh;
     SceneLoader.ImportMeshAsync("Icosphere", "/", "dice.babylon", scene).then(
@@ -137,7 +136,11 @@ export class App {
           scene
         );
         die.physicsImpostor.setLinearVelocity(new Vector3(-1.3, 0, -1.4));
-        // die.physicsImpostor.friction = 50;
+        canvas.addEventListener("click", (event) => {
+          event.preventDefault();
+          die.position = new Vector3(2, 3.3, 2);
+          die.physicsImpostor?.setLinearVelocity(new Vector3(-1.3, 0, -1.4));
+        });
       }
     );
 
