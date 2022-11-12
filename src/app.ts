@@ -61,7 +61,7 @@ export class App {
 
     // Physics
     await (window as any).Ammo();
-    const gravityVector = new Vector3(0, -9.81, 0);
+    const gravityVector = new Vector3(0, -24, 0);
     const physicsPlugin = new AmmoJSPlugin();
     scene.enablePhysics(gravityVector, physicsPlugin);
 
@@ -86,7 +86,7 @@ export class App {
       new Vector3(1, 1, 0),
       scene
     );
-    hemLight.intensity = 0.5;
+    hemLight.intensity = 0.3;
     const dirLight = new DirectionalLight(
       "dirLight",
       Vector3.Zero().subtract(new Vector3(1, 2, 1)),
@@ -94,7 +94,7 @@ export class App {
     );
     dirLight.position = new Vector3(5, 5, 5);
     dirLight.shadowEnabled = true;
-    dirLight.intensity = 1;
+    dirLight.intensity = 0.8;
 
     const ground = MeshBuilder.CreateGround("ground", {
       width: 10,
@@ -118,31 +118,31 @@ export class App {
     shadowGenerator.blurScale = 15;
 
     let die: AbstractMesh;
-    SceneLoader.ImportMeshAsync("Icosphere", "/", "dice.babylon", scene).then(
-      (mesh) => {
-        die = mesh.meshes[0];
-        die.position = new Vector3(2, 3.3, 2);
-        shadowGenerator.addShadowCaster(die, true);
-        // Physics
-        die.physicsImpostor = new PhysicsImpostor(
-          die,
-          PhysicsImpostor.ConvexHullImpostor,
-          {
-            mass: 10,
-            restitution: 0,
-            friction: 1,
-            damping: 5,
-          },
-          scene
-        );
-        die.physicsImpostor.setLinearVelocity(new Vector3(-1.3, 0, -1.4));
-        canvas.addEventListener("click", (event) => {
-          event.preventDefault();
-          die.position = new Vector3(2, 3.3, 2);
-          die.physicsImpostor?.setLinearVelocity(new Vector3(-1.3, 0, -1.4));
-        });
-      }
-    );
+
+    SceneLoader.ImportMeshAsync("", "/", "d20.babylon", scene).then((mesh) => {
+      die = mesh.meshes[0];
+      die.position = new Vector3(2, 3.3, 2);
+      shadowGenerator.addShadowCaster(die, true);
+      // Physics
+      die.physicsImpostor = new PhysicsImpostor(
+        die,
+        PhysicsImpostor.ConvexHullImpostor,
+        {
+          mass: 1,
+          restitution: 0,
+          friction: 1,
+          damping: 500,
+        },
+        scene
+      );
+      die.physicsImpostor.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+      canvas.addEventListener("click", (event) => {
+        event.preventDefault();
+        die.position = new Vector3(2, 2.3, 2);
+
+        die.physicsImpostor?.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+      });
+    });
 
     return scene;
   }
