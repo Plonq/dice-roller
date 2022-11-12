@@ -144,11 +144,6 @@ export class App {
       }
     );
 
-    scene.meshes.forEach((mesh) => {
-      if (mesh.physicsImpostor) {
-      }
-    });
-
     return scene;
   }
 }
