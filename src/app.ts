@@ -11,12 +11,14 @@ import {
   HemisphericLight,
   MeshBuilder,
   PhysicsImpostor,
+  Quaternion,
   Scene,
   SceneLoader,
   ShadowGenerator,
   Vector3,
 } from "@babylonjs/core";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
+import { d20 } from "./side-map";
 
 export class App {
   constructor(canvas: HTMLCanvasElement) {
@@ -136,12 +138,23 @@ export class App {
         scene
       );
       die.physicsImpostor.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
-      canvas.addEventListener("click", (event) => {
-        event.preventDefault();
-        die.position = new Vector3(2, 2.3, 2);
+      canvas.addEventListener("keydown", (event) => {
+        if (event.key === "r") {
+          const rq = die.rotationQuaternion;
+          console.log(
+            "rotation quarternion",
+            `new Quaternion(${rq?.x}, ${rq?.y}, ${rq?.z}, ${rq?.w}),`
+          );
+        } else if (event.key === "g") {
+          die.position = new Vector3(2, 2.3, 2);
 
-        die.physicsImpostor?.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+          die.physicsImpostor?.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+        }
       });
+
+      // setInterval(() => {
+      //   console.log("rotation quarternion", die.rotationQuaternion);
+      // }, 1000);
     });
 
     return scene;
