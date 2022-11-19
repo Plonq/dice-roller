@@ -18,7 +18,7 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
-import { d20 } from "./side-map";
+import * as rotationMaps from "./side-map";
 
 export class App {
   constructor(canvas: HTMLCanvasElement) {
@@ -60,6 +60,10 @@ export class App {
 
   async createScene(engine: Engine, canvas: HTMLCanvasElement) {
     const scene = new Scene(engine);
+
+    // "Game" state
+    let atRestFor = 0;
+    let announcedResult = false;
 
     // Physics
     await (window as any).Ammo();
@@ -109,7 +113,7 @@ export class App {
     ground.physicsImpostor = new PhysicsImpostor(
       ground,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0, friction: 0.5, restitution: 0.7 },
+      { mass: 0, friction: 0.5, restitution: 0 },
       scene
     );
 
@@ -120,9 +124,11 @@ export class App {
     shadowGenerator.blurScale = 15;
 
     let die: AbstractMesh;
+    let die_imposter: AbstractMesh;
 
-    SceneLoader.ImportMeshAsync("", "/", "d20.babylon", scene).then((mesh) => {
-      die = mesh.meshes[0];
+    SceneLoader.ImportMeshAsync("", "/", "d20.glb", scene).then((model) => {
+      die = model.meshes[0];
+      die_imposter = model.meshes[1];
       die.position = new Vector3(2, 3.3, 2);
       shadowGenerator.addShadowCaster(die, true);
       // Physics
@@ -147,14 +153,45 @@ export class App {
           );
         } else if (event.key === "g") {
           die.position = new Vector3(2, 2.3, 2);
-
           die.physicsImpostor?.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+
+          atRestFor = 0;
+          announcedResult = false;
         }
       });
 
       // setInterval(() => {
       //   console.log("rotation quarternion", die.rotationQuaternion);
       // }, 1000);
+    });
+
+    engine.runRenderLoop(() => {
+      if (die) {
+        if (atRestFor > 300) {
+          if (!announcedResult) {
+          }
+          return;
+        }
+
+        const linearVelSq = die.physicsImpostor
+          ?.getLinearVelocity()
+          ?.lengthSquared();
+        const angularVelSq = die.physicsImpostor
+          ?.getAngularVelocity()
+          ?.lengthSquared();
+        // console.log("linearVel", linearVelSq);
+        // console.log("angularVel", angularVelSq);
+        if (
+          angularVelSq &&
+          angularVelSq < 0.1 &&
+          linearVelSq &&
+          linearVelSq < 0.1
+        ) {
+          atRestFor += scene.deltaTime;
+        } else {
+          atRestFor = 0;
+        }
+      }
     });
 
     return scene;
