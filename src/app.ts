@@ -9,16 +9,16 @@ import {
   DirectionalLight,
   Engine,
   HemisphericLight,
+  Mesh,
   MeshBuilder,
   PhysicsImpostor,
-  Quaternion,
   Scene,
   SceneLoader,
   ShadowGenerator,
   Vector3,
 } from "@babylonjs/core";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
-import * as rotationMaps from "./side-map";
+import * as faceMaps from "./side-map";
 
 export class App {
   constructor(canvas: HTMLCanvasElement) {
@@ -85,7 +85,7 @@ export class App {
     camera.lowerRadiusLimit = 0.2;
     camera.upperRadiusLimit = 10;
     camera.minZ = 0.1;
-    // camera.attachControl(canvas, true);
+    camera.attachControl(canvas, true);
 
     const hemLight: HemisphericLight = new HemisphericLight(
       "hemLight",
@@ -124,63 +124,71 @@ export class App {
     shadowGenerator.blurScale = 15;
 
     let die: AbstractMesh;
-    let die_imposter: AbstractMesh;
+    let dieCollider: AbstractMesh;
+    let physicsRoot: Mesh = new Mesh("diePhysicsRoot", scene);
 
     SceneLoader.ImportMeshAsync("", "/", "d20.glb", scene).then((model) => {
-      die = model.meshes[0];
-      die_imposter = model.meshes[1];
-      die.position = new Vector3(2, 3.3, 2);
-      shadowGenerator.addShadowCaster(die, true);
-      // Physics
-      die.physicsImpostor = new PhysicsImpostor(
-        die,
+      const root = model.meshes.find((m) => m.parent === null)!;
+      die = model.meshes.find((m) => m.name === "d20")!;
+      dieCollider = model.meshes.find((m) => m.name === "d20_imposter")!;
+      dieCollider.isVisible = false;
+      physicsRoot.addChild(dieCollider);
+      physicsRoot.addChild(root);
+      dieCollider.physicsImpostor = new PhysicsImpostor(
+        dieCollider,
         PhysicsImpostor.ConvexHullImpostor,
-        {
-          mass: 1,
-          restitution: 0,
-          friction: 1,
-          damping: 500,
-        },
-        scene
+        { mass: 1 }
       );
-      die.physicsImpostor.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+      physicsRoot.physicsImpostor = new PhysicsImpostor(
+        physicsRoot,
+        PhysicsImpostor.NoImpostor,
+        { mass: 1, restitution: 0, friction: 1, damping: 500 }
+      );
+      shadowGenerator.addShadowCaster(die, true);
+
+      physicsRoot.position = new Vector3(2, 3.3, 2);
+      physicsRoot.physicsImpostor.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
+
       canvas.addEventListener("keydown", (event) => {
-        if (event.key === "r") {
-          const rq = die.rotationQuaternion;
-          console.log(
-            "rotation quarternion",
-            `new Quaternion(${rq?.x}, ${rq?.y}, ${rq?.z}, ${rq?.w}),`
+        if (event.key === "g") {
+          physicsRoot.position = new Vector3(2, 2.3, 2);
+          physicsRoot.physicsImpostor?.setLinearVelocity(
+            new Vector3(-2.3, 0, -2.4)
           );
-        } else if (event.key === "g") {
-          die.position = new Vector3(2, 2.3, 2);
-          die.physicsImpostor?.setLinearVelocity(new Vector3(-2.3, 0, -2.4));
 
           atRestFor = 0;
           announcedResult = false;
         }
       });
-
-      // setInterval(() => {
-      //   console.log("rotation quarternion", die.rotationQuaternion);
-      // }, 1000);
     });
 
     engine.runRenderLoop(() => {
-      if (die) {
-        if (atRestFor > 300) {
+      if (physicsRoot) {
+        if (atRestFor > 350) {
           if (!announcedResult) {
+            for (
+              let i = 0;
+              i < dieCollider.getFacetLocalNormals().length;
+              i++
+            ) {
+              if (
+                Vector3.Dot(dieCollider.getFacetNormal(i), Vector3.Up()) > 0.999
+              ) {
+                console.log("NUMBER:", faceMaps.d20[i]);
+                break;
+              }
+            }
+            announcedResult = true;
           }
           return;
         }
 
-        const linearVelSq = die.physicsImpostor
+        const linearVelSq = physicsRoot.physicsImpostor
           ?.getLinearVelocity()
           ?.lengthSquared();
-        const angularVelSq = die.physicsImpostor
+        const angularVelSq = physicsRoot.physicsImpostor
           ?.getAngularVelocity()
           ?.lengthSquared();
-        // console.log("linearVel", linearVelSq);
-        // console.log("angularVel", angularVelSq);
         if (
           angularVelSq &&
           angularVelSq < 0.1 &&
