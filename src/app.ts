@@ -82,10 +82,9 @@ export class App {
       Vector3.Zero(),
       scene
     );
-    camera.lowerRadiusLimit = 0.2;
-    camera.upperRadiusLimit = 10;
-    camera.minZ = 0.1;
-    camera.attachControl(canvas, true);
+    camera.fov = 0.4;
+    camera.radius = 10;
+    // camera.attachControl(canvas, true);
 
     const hemLight: HemisphericLight = new HemisphericLight(
       "hemLight",
