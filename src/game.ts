@@ -214,22 +214,22 @@ export class Game {
     }
 
     const topWall = MeshBuilder.CreateBox("wallTop", {
-      width: 100,
+      width: 20,
       height: 1,
       depth: 0.1,
     });
     const leftWall = MeshBuilder.CreateBox("wallLeft", {
       width: 0.1,
       height: 1,
-      depth: 100,
+      depth: 20,
     });
     const rightWall = MeshBuilder.CreateBox("wallRight", {
       width: 0.1,
       height: 1,
-      depth: 100,
+      depth: 20,
     });
     const bottomWall = MeshBuilder.CreateBox("wallBottom", {
-      width: 100,
+      width: 20,
       height: 1,
       depth: 0.1,
     });
