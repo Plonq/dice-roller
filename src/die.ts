@@ -27,7 +27,7 @@ export class Die {
   ) {
     this.type = type;
     this.colliderMesh = collider;
-    const newRoot: Mesh = new Mesh(`${type}_physicsRoot`, scene);
+    const newRoot: Mesh = new Mesh(`i_${type}`, scene);
     newRoot.addChild(model);
     newRoot.addChild(collider);
     collider.isVisible = false;

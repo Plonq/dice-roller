@@ -266,6 +266,8 @@ export class Game {
       throw new Error("Must call init() before any other method");
     }
 
+    this.clear();
+
     return new Promise<DiceRollResult>((resolve, _reject) => {
       const dice: Die[] = [];
       for (let [type, count] of Object.entries(rolls)) {
@@ -291,7 +293,13 @@ export class Game {
     );
   }
 
-  public async clear() {}
+  public async clear() {
+    for (let mesh of this.scene!.meshes.filter((m) =>
+      m.name.startsWith("i_")
+    )) {
+      mesh.dispose();
+    }
+  }
 
   private createInstance(typeKey: string, id: string | number) {
     const modelInstance = this.diceMeshes[typeKey].model.createInstance(
