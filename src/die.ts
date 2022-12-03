@@ -70,6 +70,12 @@ export class Die {
     this.rootMesh.physicsImpostor?.setLinearVelocity(velocity);
   }
 
+  public jiggle() {
+    this.setVelocity(
+      new Vector3(Utils.randRange(0.5, 2), 0.1, Utils.randRange(0.5, 2))
+    );
+  }
+
   public updateAtRest(deltaTime: number) {
     const linearVelSq = this.rootMesh.physicsImpostor
       ?.getLinearVelocity()
@@ -90,11 +96,6 @@ export class Die {
   }
 
   public calculateResult() {
-    console.log(
-      this.type,
-      "num facets:",
-      this.colliderMesh.getFacetLocalNormals().length
-    );
     for (let i = 0; i < this.colliderMesh.getFacetLocalNormals().length; i++) {
       if (
         Vector3.Dot(this.colliderMesh.getFacetNormal(i), Vector3.Up()) > 0.999
@@ -162,7 +163,7 @@ export class DieRoller {
       position.y = 1.3;
       die.setPosition(position);
       die.setVelocity(
-        Vector3.Zero().subtract(position).multiplyByFloats(4, 4, 4)
+        Vector3.Zero().subtract(position).multiplyByFloats(3, 3, 3)
       );
       die.setRotation(
         new Quaternion(
@@ -192,12 +193,13 @@ export class DieRoller {
             // console.log("resting, result is:", result);
             if (result) {
               rollResults[index] = result;
-              die.convertToStaticObject();
+              // die.convertToStaticObject();
             } else {
               console.warn(
-                "Die at rest but couldn't determine result",
+                "Die at rest but couldn't determine result. JIGGLING",
                 die.type
               );
+              die.jiggle();
               //
             }
             // console.log("results:", rollResults);
