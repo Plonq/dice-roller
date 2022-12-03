@@ -12,7 +12,9 @@ export class App {
     await this.game.init();
     this.enableDebugHotkey();
 
-    this.roll({ [DieType.D20]: 1, [DieType.D6]: 1 });
+    setTimeout(() => {
+      this.roll({ [DieType.D20]: 1, [DieType.D6]: 1 });
+    }, 300);
   }
 
   enableDebugHotkey() {
