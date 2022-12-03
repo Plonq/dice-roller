@@ -9,6 +9,7 @@ import {
 } from "@babylonjs/core";
 import faceMaps from "./side-map";
 import { DiceRollResult, DieType } from "./model";
+import { Utils } from "./Utils";
 
 export class Die {
   protected rootMesh: AbstractMesh;
@@ -98,12 +99,40 @@ export class DieRoller {
     this.engine = engine;
     this.scene = scene;
 
-    for (let die of this.dice) {
-      die.setPosition(new Vector3(2, 1.3, 2));
-      die.setVelocity(new Vector3(-5.3, 0, -5.4));
-    }
-
+    this.setRandomPositions();
     this.waitForResults(onComplete);
+  }
+
+  private setRandomPositions() {
+    const predicate = (mesh: AbstractMesh) => mesh.name === "ground"; // Only pick ground mesh
+    for (let die of this.dice) {
+      let position: Vector3;
+      const side = Utils.randIntRange(0, 3);
+      if (side === 0 || side === 2) {
+        // Top/bottom
+        const windowY = Utils.randRange(0, innerHeight);
+        const pick = this.scene.pick(
+          side === 0 ? 0 : innerWidth,
+          windowY,
+          predicate
+        );
+        position = pick.pickedPoint!;
+      } else {
+        // Left/right
+        const windowX = Utils.randRange(0, innerWidth);
+        const pick = this.scene.pick(
+          windowX,
+          side === 1 ? 0 : innerHeight,
+          predicate
+        );
+        position = pick.pickedPoint!;
+      }
+      position.y = 1.3;
+      die.setPosition(position);
+      die.setVelocity(
+        Vector3.Zero().subtract(position).multiplyByFloats(4, 4, 4)
+      );
+    }
   }
 
   private waitForResults(onComplete: (results: DiceRollResult) => unknown) {
