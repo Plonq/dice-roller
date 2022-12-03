@@ -3,6 +3,7 @@ import {
   Engine,
   Mesh,
   PhysicsImpostor,
+  Quaternion,
   Scene,
   ShadowGenerator,
   Vector3,
@@ -18,7 +19,6 @@ export class Die {
   public type: DieType;
 
   constructor(
-    name: string,
     type: DieType,
     model: AbstractMesh,
     collider: AbstractMesh,
@@ -27,18 +27,32 @@ export class Die {
   ) {
     this.type = type;
     this.colliderMesh = collider;
-    const newRoot: Mesh = new Mesh(`${name}_physicsRoot`, scene);
+    const newRoot: Mesh = new Mesh(`${type}_physicsRoot`, scene);
     newRoot.addChild(model);
     newRoot.addChild(collider);
     collider.isVisible = false;
-    collider.physicsImpostor = new PhysicsImpostor(
-      collider,
-      PhysicsImpostor.ConvexHullImpostor
-    );
+    const imposterType =
+      this.type === DieType.D6
+        ? PhysicsImpostor.BoxImpostor
+        : PhysicsImpostor.ConvexHullImpostor;
+    collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
+      mass: 0,
+    });
+    collider.physicsImpostor.setDeltaPosition(Vector3.ZeroReadOnly);
+    collider.physicsImpostor.setDeltaRotation(Quaternion.Identity());
+    collider.physicsImpostor.setScalingUpdated();
     newRoot.physicsImpostor = new PhysicsImpostor(
       newRoot,
       PhysicsImpostor.NoImpostor,
-      { mass: 1, restitution: 0, friction: 1, damping: 500 }
+      {
+        mass: 1,
+        restitution: 0,
+        friction: 1,
+        damping: 500,
+        margin: 0,
+
+        // disableBidirectionalTransformation: true,
+      }
     );
     this.rootMesh = newRoot;
     shadowGenerator?.addShadowCaster(model, true);
@@ -72,12 +86,22 @@ export class Die {
   }
 
   public calculateResult() {
+    console.log(
+      this.type,
+      "num facets:",
+      this.colliderMesh.getFacetLocalNormals().length
+    );
     for (let i = 0; i < this.colliderMesh.getFacetLocalNormals().length; i++) {
       if (
         Vector3.Dot(this.colliderMesh.getFacetNormal(i), Vector3.Up()) > 0.999
       ) {
         // @ts-ignore
-        return faceMaps[this.type][i];
+        const result = faceMaps[this.type][i];
+        if (result) {
+          return result;
+        } else {
+          console.debug(this.type, "got result but not in map. index:", i);
+        }
       }
     }
     return null;
@@ -158,7 +182,10 @@ export class DieRoller {
               rollResults[index] = result;
               die.convertToStaticObject();
             } else {
-              console.warn("Die at rest but could not determine result");
+              console.warn(
+                "Die at rest but couldn't determine result",
+                die.type
+              );
               //
             }
             // console.log("results:", rollResults);

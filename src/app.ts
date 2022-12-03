@@ -1,5 +1,5 @@
 import { Game } from "./game";
-import { DiceRoll } from "src/die";
+import { DiceRoll, DieType } from "./model";
 
 export class App {
   game: Game;
@@ -12,9 +12,7 @@ export class App {
     await this.game.init();
     this.enableDebugHotkey();
 
-    this.roll({
-      d20: 2,
-    });
+    this.roll({ [DieType.D20]: 0, [DieType.D6]: 1 });
   }
 
   enableDebugHotkey() {
@@ -24,7 +22,7 @@ export class App {
         this.game.toggleDebugLayer();
       }
       if (ev.key === "g") {
-        this.roll({ d20: 2 });
+        this.roll({ [DieType.D20]: 0, [DieType.D6]: 1 });
       }
     });
   }

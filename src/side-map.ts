@@ -1,5 +1,7 @@
 import { DieType } from "./model";
 
+const d6: number[] = [2, 2, 3, 3, 5, 5, 4, 4, 6, 6, 1, 1];
+
 const d20: { [key: number]: number } = {
   0: 12,
   1: 10,
@@ -25,6 +27,7 @@ const d20: { [key: number]: number } = {
 
 const ex: { [key in DieType]?: { [key: number]: number } } = {
   [DieType.D20]: d20,
+  [DieType.D6]: d6,
 };
 
 export default ex;

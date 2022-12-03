@@ -19,7 +19,7 @@ import {
 } from "@babylonjs/core";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
 import { Die, DieRoller } from "./die";
-import { DiceRoll, DieType } from "./model";
+import { DiceRoll, DiceRollResult, DieType } from "./model";
 
 export interface GameConfig {}
 
@@ -45,17 +45,10 @@ export class Game {
     this.canvas.style.height = "100%";
 
     const engine = new Engine(this.canvas, true);
-    const scene = await this.createScene(engine, this.canvas);
+    const scene = new Scene(engine);
 
-    const assetManager = new AssetsManager(scene);
-    const d20Task = assetManager.addMeshTask("d20", "", "/", "d20.glb");
-    d20Task.onSuccess = (task) => {
-      this.diceMeshes.d20 = this.processDieModel(task.loadedMeshes);
-    };
-    d20Task.onError = () => {
-      console.error("d20 failed to load");
-    };
-    await assetManager.loadAsync();
+    this.loadAssets(scene);
+    await this.fillScene(scene, this.canvas);
 
     let timeout: number;
     window.addEventListener("resize", () => {
@@ -75,8 +68,40 @@ export class Game {
     this.scene = scene;
   }
 
-  private async createScene(engine: Engine, canvas: HTMLCanvasElement) {
-    const scene = new Scene(engine);
+  private async loadAssets(scene: Scene) {
+    const assetManager = new AssetsManager(scene);
+    const d20Task = assetManager.addMeshTask("dice", "", "/", "devdice.glb");
+    d20Task.onSuccess = (task) => {
+      this.processDiceMeshes(task.loadedMeshes);
+    };
+    d20Task.onError = (task) => {
+      console.error("Failed to load dice models: ", task.errorObject);
+    };
+    await assetManager.loadAsync();
+  }
+
+  private processDiceMeshes(meshes: AbstractMesh[]) {
+    for (let dieType of Object.values(DieType)) {
+      const filtered = meshes.filter((m) =>
+        m.name.toUpperCase().includes(dieType)
+      );
+      const model = filtered.find((m) => m.name.includes("model"));
+      const collider = filtered.find((m) => m.name.includes("collider"));
+      if (model && collider) {
+        model.isVisible = false;
+        collider.isVisible = false;
+        this.diceMeshes[dieType] = {
+          model: model as Mesh,
+          collider: collider as Mesh,
+        };
+        console.debug("Models for", dieType, "loaded");
+      } else {
+        console.warn("Could not find models for", dieType);
+      }
+    }
+  }
+
+  private async fillScene(scene: Scene, canvas: HTMLCanvasElement) {
     scene.useRightHandedSystem = true;
 
     // "Game" state
@@ -146,14 +171,6 @@ export class Game {
     shadowGenerator.blurScale = 15;
 
     return scene;
-  }
-
-  private processDieModel(meshes: AbstractMesh[]) {
-    const model = meshes.find((m) => m.name.includes("model"))!;
-    const collider = meshes.find((m) => m.name.includes("collider"))!;
-    model.isVisible = false;
-    collider.isVisible = false;
-    return { model: model as Mesh, collider: collider as Mesh };
   }
 
   private onResize() {
@@ -249,28 +266,29 @@ export class Game {
       throw new Error("Must call init() before any other method");
     }
 
-    const dice: Die[] = [];
-    if (rolls.d20) {
-      for (let i = 0; i < rolls.d20; i++) {
-        const { modelInstance, colliderInstance } = this.createInstance(
-          "d20",
-          i
-        );
-        dice.push(
-          new Die(
-            "d20",
-            DieType.D20,
-            modelInstance,
-            colliderInstance,
-            this.shadowGenerator!,
-            this.scene!
-          )
-        );
+    return new Promise<DiceRollResult>((resolve, _reject) => {
+      const dice: Die[] = [];
+      for (let [type, count] of Object.entries(rolls)) {
+        for (let i = 0; i < count; i++) {
+          dice.push(this.spawnDie(type as DieType, i));
+        }
       }
-    }
-    new DieRoller(dice, this.engine!, this.scene!, (results) => {
-      console.log("FINAL RESULTS:", results);
+      new DieRoller(dice, this.engine!, this.scene!, (results) => {
+        // console.log("FINAL RESULTS:", results);
+        resolve(results);
+      });
     });
+  }
+
+  private spawnDie(type: DieType, id: number) {
+    const { modelInstance, colliderInstance } = this.createInstance(type, id);
+    return new Die(
+      type,
+      modelInstance,
+      colliderInstance,
+      this.shadowGenerator!,
+      this.scene!
+    );
   }
 
   public async clear() {}
