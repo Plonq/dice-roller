@@ -12,7 +12,7 @@ export class App {
     await this.game.init();
     this.enableDebugHotkey();
 
-    this.roll({ [DieType.D20]: 0, [DieType.D6]: 1 });
+    this.roll({ [DieType.D20]: 1, [DieType.D6]: 1 });
   }
 
   enableDebugHotkey() {
@@ -22,7 +22,7 @@ export class App {
         this.game.toggleDebugLayer();
       }
       if (ev.key === "g") {
-        this.roll({ [DieType.D20]: 0, [DieType.D6]: 1 });
+        this.roll({ [DieType.D20]: 8, [DieType.D6]: 8 });
       }
     });
   }

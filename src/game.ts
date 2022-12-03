@@ -47,8 +47,8 @@ export class Game {
     const engine = new Engine(this.canvas, true);
     const scene = new Scene(engine);
 
-    this.loadAssets(scene);
     await this.fillScene(scene, this.canvas);
+    await this.loadAssets(scene);
 
     let timeout: number;
     window.addEventListener("resize", () => {
