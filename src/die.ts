@@ -61,9 +61,9 @@ export class Die {
       ?.lengthSquared();
     if (
       angularVelSq &&
-      angularVelSq < 0.1 &&
+      angularVelSq < 0.01 &&
       linearVelSq &&
-      linearVelSq < 0.1
+      linearVelSq < 0.01
     ) {
       this.atRestFor += deltaTime;
     } else {
@@ -81,6 +81,10 @@ export class Die {
       }
     }
     return null;
+  }
+
+  convertToStaticObject() {
+    this.rootMesh.physicsImpostor?.setMass(0);
   }
 }
 
@@ -152,6 +156,10 @@ export class DieRoller {
             // console.log("resting, result is:", result);
             if (result) {
               rollResults[index] = result;
+              die.convertToStaticObject();
+            } else {
+              console.warn("Die at rest but could not determine result");
+              //
             }
             // console.log("results:", rollResults);
           }
