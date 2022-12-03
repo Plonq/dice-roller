@@ -144,10 +144,12 @@ export class Game {
     dirLight.shadowEnabled = true;
     dirLight.intensity = 0.8;
 
-    const ground = MeshBuilder.CreateGround("ground", {
-      width: 10,
-      height: 10,
+    const ground = MeshBuilder.CreateBox("ground", {
+      width: 20,
+      depth: 20,
+      height: 1,
     });
+    ground.position.y -= 0.5;
     const material = new ShadowOnlyMaterial("shadowOnlyMaterial", scene);
     material.activeLight = dirLight;
     ground.material = material;
