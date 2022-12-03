@@ -13,7 +13,7 @@ export class App {
     this.enableDebugHotkey();
 
     this.roll({
-      d20: 1,
+      d20: 2,
     });
   }
 
@@ -22,6 +22,9 @@ export class App {
       // Shift+Ctrl+Alt+I
       if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.keyCode === 73) {
         this.game.toggleDebugLayer();
+      }
+      if (ev.key === "g") {
+        this.roll({ d20: 2 });
       }
     });
   }
