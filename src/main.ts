@@ -1,4 +1,5 @@
-import './style.css'
-import { App } from './app'
+import "./style.css";
+import { App } from "./app";
 
-new App(document.querySelector<HTMLCanvasElement>("#canvas")!);
+const app = new App();
+app.init();

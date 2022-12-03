@@ -1,4 +1,6 @@
-export const d20: { [key: number]: number } = {
+import { DieType } from "./model";
+
+const d20: { [key: number]: number } = {
   0: 12,
   1: 10,
   2: 2,
@@ -20,3 +22,9 @@ export const d20: { [key: number]: number } = {
   18: 9,
   19: 19,
 };
+
+const ex: { [key in DieType]?: { [key: number]: number } } = {
+  [DieType.D20]: d20,
+};
+
+export default ex;
