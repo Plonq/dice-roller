@@ -218,22 +218,22 @@ export class Game {
     topWall.physicsImpostor = new PhysicsImpostor(
       topWall,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0 }
+      { mass: 0, friction: 0 }
     );
     leftWall.physicsImpostor = new PhysicsImpostor(
       leftWall,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0 }
+      { mass: 0, friction: 0 }
     );
     rightWall.physicsImpostor = new PhysicsImpostor(
       rightWall,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0 }
+      { mass: 0, friction: 0 }
     );
     bottomWall.physicsImpostor = new PhysicsImpostor(
       bottomWall,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0 }
+      { mass: 0, friction: 0 }
     );
 
     topWall.isVisible = false;
@@ -249,25 +249,28 @@ export class Game {
       throw new Error("Must call init() before any other method");
     }
 
+    const dice: Die[] = [];
     if (rolls.d20) {
       for (let i = 0; i < rolls.d20; i++) {
         const { modelInstance, colliderInstance } = this.createInstance(
           "d20",
           i
         );
-        const die = new Die(
-          "d20",
-          DieType.D20,
-          modelInstance,
-          colliderInstance,
-          this.shadowGenerator!,
-          this.scene!
+        dice.push(
+          new Die(
+            "d20",
+            DieType.D20,
+            modelInstance,
+            colliderInstance,
+            this.shadowGenerator!,
+            this.scene!
+          )
         );
-        new DieRoller([die], this.engine!, this.scene!, (results) => {
-          console.log("FINAL RESULTS:", results);
-        });
       }
     }
+    new DieRoller(dice, this.engine!, this.scene!, (results) => {
+      console.log("FINAL RESULTS:", results);
+    });
   }
 
   public async clear() {}
