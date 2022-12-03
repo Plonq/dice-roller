@@ -155,7 +155,7 @@ export class Game {
     ground.physicsImpostor = new PhysicsImpostor(
       ground,
       PhysicsImpostor.BoxImpostor,
-      { mass: 0, friction: 0.5, restitution: 0 },
+      { mass: 0, friction: 0.6, restitution: 0 },
       scene
     );
 

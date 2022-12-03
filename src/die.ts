@@ -62,6 +62,10 @@ export class Die {
     this.rootMesh.position = position;
   }
 
+  public setRotation(rotation: Quaternion) {
+    this.rootMesh.rotationQuaternion = rotation;
+  }
+
   public setVelocity(velocity: Vector3) {
     this.rootMesh.physicsImpostor?.setLinearVelocity(velocity);
   }
@@ -127,11 +131,11 @@ export class DieRoller {
     this.engine = engine;
     this.scene = scene;
 
-    this.setRandomPositions();
+    this.randomise();
     this.waitForResults(onComplete);
   }
 
-  private setRandomPositions() {
+  private randomise() {
     const predicate = (mesh: AbstractMesh) => mesh.name === "ground"; // Only pick ground mesh
     for (let die of this.dice) {
       let position: Vector3;
@@ -159,6 +163,14 @@ export class DieRoller {
       die.setPosition(position);
       die.setVelocity(
         Vector3.Zero().subtract(position).multiplyByFloats(4, 4, 4)
+      );
+      die.setRotation(
+        new Quaternion(
+          Math.random(),
+          Math.random(),
+          Math.random(),
+          Math.random()
+        )
       );
     }
   }
