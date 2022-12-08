@@ -38,9 +38,22 @@ export class Die {
     collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
       mass: 0,
     });
-    collider.physicsImpostor.setDeltaPosition(Vector3.ZeroReadOnly);
-    collider.physicsImpostor.setDeltaRotation(Quaternion.Identity());
-    collider.physicsImpostor.setScalingUpdated();
+    switch (this.type) {
+      case DieType.D4:
+        collider.scaling.scaleInPlace(0.41);
+        break;
+      case DieType.D6:
+        break;
+      case DieType.D8:
+        break;
+      case DieType.D10:
+        break;
+      case DieType.D12:
+        break;
+      case DieType.D20:
+        collider.scaling.scaleInPlace(0.77);
+        break;
+    }
     newRoot.physicsImpostor = new PhysicsImpostor(
       newRoot,
       PhysicsImpostor.NoImpostor,
