@@ -1,6 +1,7 @@
 import { DieType } from "./model";
 
-const d6: number[] = [2, 2, 3, 3, 5, 5, 4, 4, 6, 6, 1, 1];
+const d4: number[] = [4, 3, 2, 1];
+const d6: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [num, num]);
 
 const d20: { [key: number]: number } = {
   0: 12,
@@ -26,8 +27,9 @@ const d20: { [key: number]: number } = {
 };
 
 const ex: { [key in DieType]?: { [key: number]: number } } = {
-  [DieType.D20]: d20,
+  [DieType.D4]: d4,
   [DieType.D6]: d6,
+  [DieType.D20]: d20,
 };
 
 export default ex;

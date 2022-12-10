@@ -10,11 +10,11 @@ import {
 } from "@babylonjs/core";
 import faceMaps from "./side-map";
 import { DiceRollResult, DieType } from "./model";
-import { Utils } from "./Utils";
+import { Utils } from "./utils";
 
 export class Die {
-  protected rootMesh: AbstractMesh;
-  protected colliderMesh: AbstractMesh;
+  public rootMesh: AbstractMesh;
+  public colliderMesh: AbstractMesh;
   public atRestFor: number = 0;
   public type: DieType;
 
@@ -26,34 +26,59 @@ export class Die {
     scene: Scene
   ) {
     this.type = type;
+    collider.isVisible = false;
+    // const colliderName = `${this.type}_collider`;
+    // let collider: Mesh;
+    // switch (this.type) {
+    //   case DieType.D4:
+    //     collider = MeshBuilder.CreatePolyhedron(
+    //       colliderName,
+    //       {
+    //         type: 0,
+    //         size: 0.11,
+    //       },
+    //       scene
+    //     );
+    //     break;
+    //   case DieType.D6:
+    //     collider = MeshBuilder.CreateBox(colliderName, { size: 0.22 }, scene);
+    //     break;
+    //   case DieType.D8:
+    //     break;
+    //   case DieType.D10:
+    //     break;
+    //   case DieType.D12:
+    //     break;
+    //   case DieType.D20:
+    //     collider = MeshBuilder.CreatePolyhedron(
+    //       colliderName,
+    //       {
+    //         type: 3,
+    //         size: 0.14,
+    //       },
+    //       scene
+    //     );
+    //     collider.rotationQuaternion = new Quaternion(
+    //       0.6724985119639573,
+    //       0.21850801222441052,
+    //       -0.2185080122244105,
+    //       0.6724985119639574
+    //     );
+    //     break;
+    // }
     this.colliderMesh = collider;
     const newRoot: Mesh = new Mesh(`i_${type}`, scene);
     newRoot.addChild(model);
-    newRoot.addChild(collider);
-    collider.isVisible = false;
+    newRoot.addChild(collider!);
+    // model.isVisible = false;
+    // collider.isVisible = false;
     const imposterType =
       this.type === DieType.D6
         ? PhysicsImpostor.BoxImpostor
         : PhysicsImpostor.ConvexHullImpostor;
-    collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
+    collider!.physicsImpostor = new PhysicsImpostor(collider!, imposterType, {
       mass: 0,
     });
-    switch (this.type) {
-      case DieType.D4:
-        collider.scaling.scaleInPlace(0.41);
-        break;
-      case DieType.D6:
-        break;
-      case DieType.D8:
-        break;
-      case DieType.D10:
-        break;
-      case DieType.D12:
-        break;
-      case DieType.D20:
-        collider.scaling.scaleInPlace(0.77);
-        break;
-    }
     newRoot.physicsImpostor = new PhysicsImpostor(
       newRoot,
       PhysicsImpostor.NoImpostor,
@@ -69,6 +94,7 @@ export class Die {
     );
     this.rootMesh = newRoot;
     shadowGenerator?.addShadowCaster(model, true);
+    shadowGenerator?.addShadowCaster(collider!, true);
   }
 
   public setPosition(position: Vector3) {
@@ -201,7 +227,7 @@ export class DieRoller {
           // console.log("haven't got result yet");
           die.updateAtRest(this.scene.deltaTime);
           // console.log("updated rest value:", die.atRestFor);
-          if (die.atRestFor > 50) {
+          if (die.atRestFor > 350) {
             const result = die.calculateResult();
             // console.log("resting, result is:", result);
             if (result) {
@@ -209,11 +235,10 @@ export class DieRoller {
               // die.convertToStaticObject();
             } else {
               console.warn(
-                "Die at rest but couldn't determine result. JIGGLING",
+                // "Die at rest but couldn't determine result. JIGGLING",
                 die.type
               );
               die.jiggle();
-              //
             }
             // console.log("results:", rollResults);
           }
@@ -237,7 +262,7 @@ export class DieRoller {
         this.engine.stopRenderLoop(diceResultFn);
       }
     };
-    // intervalId = window.setInterval(diceResultFn, 500);
+    // intervalId = window.setInterval(diceResultFn, 1000);
     this.engine.runRenderLoop(diceResultFn);
   }
 }

@@ -13,7 +13,11 @@ export class App {
     this.enableDebugHotkey();
 
     setTimeout(() => {
-      this.roll({ [DieType.D20]: 1, [DieType.D6]: 1 });
+      this.roll({
+        [DieType.D20]: 1,
+        [DieType.D6]: 1,
+        [DieType.D4]: 1,
+      });
     }, 300);
   }
 
@@ -24,7 +28,7 @@ export class App {
         this.game.toggleDebugLayer();
       }
       if (ev.key === "g") {
-        this.roll({ [DieType.D20]: 8, [DieType.D6]: 8 });
+        this.roll({ [DieType.D20]: 8, [DieType.D6]: 8, [DieType.D4]: 8 });
       }
     });
   }

@@ -153,6 +153,7 @@ export class Game {
     const material = new ShadowOnlyMaterial("shadowOnlyMaterial", scene);
     material.activeLight = dirLight;
     ground.material = material;
+    // scene.defaultMaterial.backFaceCulling = false;
     ground.receiveShadows = true;
     ground.physicsImpostor = new PhysicsImpostor(
       ground,
