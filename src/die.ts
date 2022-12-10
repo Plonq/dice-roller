@@ -227,7 +227,7 @@ export class DieRoller {
           // console.log("haven't got result yet");
           die.updateAtRest(this.scene.deltaTime);
           // console.log("updated rest value:", die.atRestFor);
-          if (die.atRestFor > 350) {
+          if (die.atRestFor > 250) {
             const result = die.calculateResult();
             // console.log("resting, result is:", result);
             if (result) {
@@ -235,10 +235,10 @@ export class DieRoller {
               // die.convertToStaticObject();
             } else {
               console.warn(
-                // "Die at rest but couldn't determine result. JIGGLING",
+                "Die at rest but couldn't determine result. JIGGLING",
                 die.type
               );
-              // die.jiggle();
+              die.jiggle();
             }
             // console.log("results:", rollResults);
           }

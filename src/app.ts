@@ -16,6 +16,7 @@ export class App {
       this.roll({
         [DieType.D20]: 1,
         [DieType.D12]: 1,
+        [DieType.D10]: 1,
         [DieType.D8]: 1,
         [DieType.D6]: 1,
         [DieType.D4]: 1,
@@ -33,6 +34,7 @@ export class App {
         this.roll({
           [DieType.D20]: 5,
           [DieType.D12]: 5,
+          [DieType.D10]: 5,
           [DieType.D8]: 5,
           [DieType.D6]: 5,
           [DieType.D4]: 5,
