@@ -2,6 +2,7 @@ import { DieType } from "./model";
 
 const d4: number[] = [4, 3, 2, 1];
 const d6: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [num, num]);
+const d8: number[] = [2, 7, 6, 3, 5, 4, 1, 8];
 
 const d20: { [key: number]: number } = {
   0: 12,
@@ -29,6 +30,7 @@ const d20: { [key: number]: number } = {
 const ex: { [key in DieType]?: { [key: number]: number } } = {
   [DieType.D4]: d4,
   [DieType.D6]: d6,
+  [DieType.D8]: d8,
   [DieType.D20]: d20,
 };
 

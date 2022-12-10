@@ -238,7 +238,7 @@ export class DieRoller {
                 // "Die at rest but couldn't determine result. JIGGLING",
                 die.type
               );
-              die.jiggle();
+              // die.jiggle();
             }
             // console.log("results:", rollResults);
           }
