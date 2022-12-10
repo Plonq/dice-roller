@@ -14,10 +14,10 @@ export class App {
 
     setTimeout(() => {
       this.roll({
-        // [DieType.D20]: 1,
+        [DieType.D20]: 1,
         [DieType.D8]: 1,
-        // [DieType.D6]: 1,
-        // [DieType.D4]: 1,
+        [DieType.D6]: 1,
+        [DieType.D4]: 1,
       });
     }, 300);
   }
@@ -30,10 +30,10 @@ export class App {
       }
       if (ev.key === "g") {
         this.roll({
-          // [DieType.D20]: 8,
-          [DieType.D8]: 1,
-          // [DieType.D6]: 8,
-          // [DieType.D4]: 8
+          [DieType.D20]: 5,
+          [DieType.D8]: 5,
+          [DieType.D6]: 5,
+          [DieType.D4]: 5,
         });
       }
     });
