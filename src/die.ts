@@ -30,27 +30,22 @@ export class Die {
     this.colliderMesh = collider;
     const newRoot: Mesh = new Mesh(`i_${type}`, scene);
     newRoot.addChild(model);
-    newRoot.addChild(collider!);
-    // model.isVisible = false;
-    // collider.isVisible = false;
+    newRoot.addChild(collider);
     const imposterType =
       this.type === "d6"
         ? PhysicsImpostor.BoxImpostor
         : PhysicsImpostor.ConvexHullImpostor;
-    collider!.physicsImpostor = new PhysicsImpostor(collider!, imposterType, {
+    collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
       mass: 0,
     });
     newRoot.physicsImpostor = new PhysicsImpostor(
       newRoot,
       PhysicsImpostor.NoImpostor,
       {
-        mass: 1,
+        mass: 50,
         restitution: 0,
         friction: 1,
         damping: 500,
-        margin: 0,
-
-        // disableBidirectionalTransformation: true,
       }
     );
     this.rootMesh = newRoot;
