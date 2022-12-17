@@ -10,10 +10,11 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <div class="fixed top-0 left-0 right-0 bottom-0">
+
+    <div class="fixed top-0 left-0 right-0 bottom-0 pointer-events-none">
       <!-- Dice Chooser -->
       <div
-        class="absolute bottom-0 left-0 p-5 flex flex-col items-start"
+        class="absolute bottom-0 left-0 p-5 flex flex-col items-start pointer-events-auto"
         x-data="rolls"
       >
         <div x-show="open" class="flex flex-col gap-2 text-white">
@@ -110,7 +111,7 @@
       <div
         x-data
         id="hud-results"
-        class="absolute bottom-0 right-0 p-5"
+        class="absolute bottom-0 right-0 p-5 pointer-events-auto"
         x-bind:class="$store.result.visible ? 'translate-y-0 transition-transform ease-in-out' : 'translate-y-full'"
       >
         <div class="flex flex-col-reverse items-end">

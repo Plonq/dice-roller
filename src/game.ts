@@ -163,7 +163,7 @@ export class Game {
     this.setupOrAdjustWalls(scene);
 
     // Shadows
-    const shadowGenerator = new ShadowGenerator(1024, dirLight);
+    const shadowGenerator = new ShadowGenerator(2048, dirLight);
     this.shadowGenerator = shadowGenerator;
     shadowGenerator.usePoissonSampling = true;
     shadowGenerator.bias = 0.0001;
