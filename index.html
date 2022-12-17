@@ -12,7 +12,99 @@
     <canvas id="canvas"></canvas>
     <div class="fixed top-0 left-0 right-0 bottom-0">
       <!-- Dice Chooser -->
-      <div></div>
+      <div
+        class="absolute bottom-0 left-0 p-5 flex flex-col items-start"
+        x-data="rolls"
+      >
+        <div x-show="open" class="flex flex-col gap-2 text-white">
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d20 += 1"
+          >
+            d20
+            <template x-if="rolls.d20 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d20"
+              ></div>
+            </template>
+          </button>
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d12 += 1"
+          >
+            d12
+            <template x-if="rolls.d12 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d12"
+              ></div>
+            </template>
+          </button>
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d10 += 1"
+          >
+            d10
+            <template x-if="rolls.d10 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d10"
+              ></div>
+            </template>
+          </button>
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d8 += 1"
+          >
+            d8
+            <template x-if="rolls.d8 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d8"
+              ></div>
+            </template>
+          </button>
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d6 += 1"
+          >
+            d6
+            <template x-if="rolls.d6 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d6"
+              ></div>
+            </template>
+          </button>
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="rolls.d4 += 1"
+          >
+            d4
+            <template x-if="rolls.d4 > 0">
+              <div
+                class="absolute -top-2 -right-3 text-sm bg-neutral-300 rounded-full shadow border border-neutral-600 aspect-square w-7 text-black flex items-center justify-center"
+                x-text="rolls.d4"
+              ></div>
+            </template>
+          </button>
+        </div>
+        <div class="flex gap-2 text-white mt-2">
+          <button
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="toggle()"
+            x-text="open ? 'X' : '^'"
+          ></button>
+          <button
+            x-show="canRoll()"
+            class="bg-neutral-900 p-4 aspect-square rounded-full shadow relative"
+            x-on:click="roll()"
+          >
+            Roll
+          </button>
+        </div>
+      </div>
 
       <!-- Results -->
       <div
@@ -21,29 +113,33 @@
         class="absolute bottom-0 right-0 p-5"
         x-bind:class="$store.result.visible ? 'translate-y-0 transition-transform ease-in-out' : 'translate-y-full'"
       >
-        <div
-          class="bg-neutral-900 rounded-2xl p-4 text-white shadow-2xl flex items-center"
-        >
-          <div style="max-width: 150px">
+        <div class="flex flex-col-reverse items-end">
+          <template x-for="(result, index) in $store.result.results">
             <div
-              class="text-xl truncate"
-              x-text="$store.result.sumString()"
-            ></div>
-            <div
-              class="text-base text-neutral-500 truncate"
-              x-text="$store.result.diceString()"
-            ></div>
-          </div>
-          <div class="text-neutral-500 mx-3">=</div>
-          <div
-            class="output-results text-4xl font-bold"
-            x-text="$store.result.result.total"
-          ></div>
+              class="bg-neutral-900 rounded-2xl p-4 text-white shadow flex items-center mb-3"
+            >
+              <div style="max-width: 150px">
+                <div
+                  class="text-xl truncate"
+                  x-text="$store.result.sumString(index)"
+                ></div>
+                <div
+                  class="text-base text-neutral-500 truncate"
+                  x-text="$store.result.diceString(index)"
+                ></div>
+              </div>
+              <div class="text-neutral-500 mx-3">=</div>
+              <div
+                class="output-results text-4xl font-bold"
+                x-text="$store.result.getResult(index)?.total"
+              ></div>
+            </div>
+          </template>
         </div>
 
-        <div class="flex justify-end mt-3">
+        <div class="flex justify-end">
           <button
-            class="rounded-3xl text-base bg-neutral-900 text-white px-3 py-1 shadow-2xl"
+            class="rounded-3xl text-base bg-neutral-900 text-white px-3 py-1 shadow"
             x-on:click="$store.result.toggle()"
           >
             Clear Results

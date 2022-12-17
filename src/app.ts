@@ -1,7 +1,7 @@
 import { Game } from "./game";
-import { DiceRoll, DiceRollResult, DieType } from "./model";
+import { DiceRoll } from "./model";
 import Alpine from "alpinejs";
-import { AlpineResult } from "./main";
+import { AlpineResult } from "./alpine";
 
 export class App {
   game: Game;
@@ -15,16 +15,24 @@ export class App {
     await this.game.init();
     this.enableDebugHotkey();
 
-    setTimeout(() => {
-      this.roll({
-        [DieType.D20]: 1,
-        [DieType.D12]: 1,
-        [DieType.D10]: 1,
-        [DieType.D8]: 1,
-        [DieType.D6]: 1,
-        [DieType.D4]: 1,
-      });
-    }, 300);
+    window.addEventListener("roll", (event: Event) => {
+      const e = event as CustomEvent;
+      console.log("Rolling with...", e.detail);
+
+      // this.clearResult();
+      this.roll(e.detail);
+    });
+
+    // setTimeout(() => {
+    //   this.roll({
+    //     d20: 1,
+    //     d12: 1,
+    //     d10: 1,
+    //     d8: 1,
+    //     d6: 1,
+    //     d4: 1,
+    //   });
+    // }, 300);
   }
 
   enableDebugHotkey() {
@@ -33,16 +41,16 @@ export class App {
       if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.keyCode === 73) {
         this.game.toggleDebugLayer();
       }
-      if (ev.key === "g") {
-        this.roll({
-          [DieType.D20]: 5,
-          [DieType.D12]: 5,
-          [DieType.D10]: 5,
-          [DieType.D8]: 5,
-          [DieType.D6]: 5,
-          [DieType.D4]: 5,
-        });
-      }
+      // if (ev.key === "g") {
+      //   this.roll({
+      //     d20: 5,
+      //     d12: 5,
+      //     d10: 5,
+      //     d8: 5,
+      //     d6: 5,
+      //     d4: 5,
+      //   });
+      // }
     });
   }
 
@@ -50,15 +58,6 @@ export class App {
     const result = await this.game.roll(dice);
 
     console.log("Result: ", result);
-    this.displayResult(result);
-  }
-
-  private displayResult(result: DiceRollResult) {
-    this.alpineResult.setResult(result);
-    this.alpineResult.toggle();
-  }
-
-  clearResult() {
-    this.alpineResult.clearResult();
+    this.alpineResult.addResult(result);
   }
 }

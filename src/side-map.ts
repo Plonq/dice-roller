@@ -36,13 +36,13 @@ const d20: { [key: number]: number } = {
   19: 19,
 };
 
-const ex: { [key in DieType]?: { [key: number]: number } } = {
-  [DieType.D4]: d4,
-  [DieType.D6]: d6,
-  [DieType.D8]: d8,
-  [DieType.D10]: d10,
-  [DieType.D12]: d12,
-  [DieType.D20]: d20,
+const ex: Record<DieType, Record<number, number>> = {
+  d4: d4,
+  d6: d6,
+  d8: d8,
+  d10: d10,
+  d12: d12,
+  d20: d20,
 };
 
 export default ex;

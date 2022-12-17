@@ -34,7 +34,7 @@ export class Die {
     // model.isVisible = false;
     // collider.isVisible = false;
     const imposterType =
-      this.type === DieType.D6
+      this.type === "d6"
         ? PhysicsImpostor.BoxImpostor
         : PhysicsImpostor.ConvexHullImpostor;
     collider!.physicsImpostor = new PhysicsImpostor(collider!, imposterType, {
@@ -210,7 +210,7 @@ export class DieRoller {
         // console.log("got all results");
         onComplete({
           total: Object.values(rollResults).reduce((sum, num) => sum + num, 0),
-          results: Object.entries(rollResults).map(([index, num]) => {
+          rolls: Object.entries(rollResults).map(([index, num]) => {
             const die: Die = this.dice[parseInt(index)];
             return { type: die.type, num: num };
           }),

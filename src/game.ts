@@ -81,9 +81,7 @@ export class Game {
 
   private processDiceMeshes(meshes: AbstractMesh[]) {
     for (let dieType of Object.values(DieType)) {
-      const filtered = meshes.filter((m) =>
-        m.name.toUpperCase().includes(dieType)
-      );
+      const filtered = meshes.filter((m) => m.name.includes(dieType));
       const model = filtered.find((m) => m.name.includes("model"));
       const collider = filtered.find((m) => m.name.includes("collider"));
       if (model && collider) {
