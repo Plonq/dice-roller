@@ -21,8 +21,6 @@ import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMa
 import { Die, DieRoller } from "./die";
 import { DiceRoll, DiceRollResult, DieType } from "./model";
 
-export interface GameConfig {}
-
 export class Game {
   private readonly canvas: HTMLCanvasElement;
   private engine: Engine | undefined;
@@ -70,6 +68,7 @@ export class Game {
 
   private async loadAssets(scene: Scene) {
     const assetManager = new AssetsManager(scene);
+    assetManager.useDefaultLoadingScreen = false;
     const d20Task = assetManager.addMeshTask("dice", "", "/", "devdice.glb");
     d20Task.onSuccess = (task) => {
       this.processDiceMeshes(task.loadedMeshes);

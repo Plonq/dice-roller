@@ -27,45 +27,6 @@ export class Die {
   ) {
     this.type = type;
     collider.isVisible = false;
-    // const colliderName = `${this.type}_collider`;
-    // let collider: Mesh;
-    // switch (this.type) {
-    //   case DieType.D4:
-    //     collider = MeshBuilder.CreatePolyhedron(
-    //       colliderName,
-    //       {
-    //         type: 0,
-    //         size: 0.11,
-    //       },
-    //       scene
-    //     );
-    //     break;
-    //   case DieType.D6:
-    //     collider = MeshBuilder.CreateBox(colliderName, { size: 0.22 }, scene);
-    //     break;
-    //   case DieType.D8:
-    //     break;
-    //   case DieType.D10:
-    //     break;
-    //   case DieType.D12:
-    //     break;
-    //   case DieType.D20:
-    //     collider = MeshBuilder.CreatePolyhedron(
-    //       colliderName,
-    //       {
-    //         type: 3,
-    //         size: 0.14,
-    //       },
-    //       scene
-    //     );
-    //     collider.rotationQuaternion = new Quaternion(
-    //       0.6724985119639573,
-    //       0.21850801222441052,
-    //       -0.2185080122244105,
-    //       0.6724985119639574
-    //     );
-    //     break;
-    // }
     this.colliderMesh = collider;
     const newRoot: Mesh = new Mesh(`i_${type}`, scene);
     newRoot.addChild(model);
@@ -249,12 +210,9 @@ export class DieRoller {
         // console.log("got all results");
         onComplete({
           total: Object.values(rollResults).reduce((sum, num) => sum + num, 0),
-          results: Object.entries(rollResults).map(([index, result]) => {
+          results: Object.entries(rollResults).map(([index, num]) => {
             const die: Die = this.dice[parseInt(index)];
-            // console.log("adding result for: ", die, "all dice:", this.dice);
-            return {
-              [die.type]: result,
-            };
+            return { type: die.type, num: num };
           }),
         });
         // console.log("Cancelling render loop");

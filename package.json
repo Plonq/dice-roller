@@ -10,14 +10,21 @@
   },
   "devDependencies": {
     "@babylonjs/core": "^5.32.1",
-    "@babylonjs/materials": "^5.32.1",
     "@babylonjs/inspector": "^5.32.1",
+    "@babylonjs/materials": "^5.32.1",
+    "@types/alpinejs": "^3.7.1",
     "@types/cannon": "^0.1.8",
     "@types/node": "^18.11.9",
     "ammojs-typed": "^1.0.6",
+    "autoprefixer": "^10.4.13",
     "cannon-es": "^0.20.0",
+    "postcss": "^8.4.20",
     "prettier": "^2.7.1",
+    "tailwindcss": "^3.2.4",
     "typescript": "^4.6.4",
     "vite": "^3.2.0"
+  },
+  "dependencies": {
+    "alpinejs": "^3.10.5"
   }
 }

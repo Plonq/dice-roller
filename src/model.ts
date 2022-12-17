@@ -12,5 +12,5 @@ export type DiceRoll = { [key in DieType]?: number };
 
 export interface DiceRollResult {
   total: number;
-  results: { [key in DieType]?: number }[];
+  results: { type: DieType; num: number }[];
 }

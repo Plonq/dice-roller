@@ -6,9 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="/ammo.js"></script>
     <title>Dice Roller</title>
+    <script type="module" src="/src/alpine.ts"></script>
   </head>
   <body>
     <canvas id="canvas"></canvas>
+    <div class="fixed top-0 left-0 right-0 bottom-0">
+      <!-- Dice Chooser -->
+      <div></div>
+
+      <!-- Results -->
+      <div
+        x-data
+        id="hud-results"
+        class="absolute bottom-0 right-0 p-5"
+        x-bind:class="$store.result.visible ? 'translate-y-0 transition-transform ease-in-out' : 'translate-y-full'"
+      >
+        <div
+          class="bg-neutral-900 rounded-2xl p-4 text-white shadow-2xl flex items-center"
+        >
+          <div style="max-width: 150px">
+            <div
+              class="text-xl truncate"
+              x-text="$store.result.sumString()"
+            ></div>
+            <div
+              class="text-base text-neutral-500 truncate"
+              x-text="$store.result.diceString()"
+            ></div>
+          </div>
+          <div class="text-neutral-500 mx-3">=</div>
+          <div
+            class="output-results text-4xl font-bold"
+            x-text="$store.result.result.total"
+          ></div>
+        </div>
+
+        <div class="flex justify-end mt-3">
+          <button
+            class="rounded-3xl text-base bg-neutral-900 text-white px-3 py-1 shadow-2xl"
+            x-on:click="$store.result.toggle()"
+          >
+            Clear Results
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

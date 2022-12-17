@@ -1,8 +1,11 @@
 import { Game } from "./game";
-import { DiceRoll, DieType } from "./model";
+import { DiceRoll, DiceRollResult, DieType } from "./model";
+import Alpine from "alpinejs";
+import { AlpineResult } from "./main";
 
 export class App {
   game: Game;
+  alpineResult = Alpine.store("result") as AlpineResult;
 
   constructor() {
     this.game = new Game(document.querySelector<HTMLCanvasElement>("#canvas")!);
@@ -47,5 +50,15 @@ export class App {
     const result = await this.game.roll(dice);
 
     console.log("Result: ", result);
+    this.displayResult(result);
+  }
+
+  private displayResult(result: DiceRollResult) {
+    this.alpineResult.setResult(result);
+    this.alpineResult.toggle();
+  }
+
+  clearResult() {
+    this.alpineResult.clearResult();
   }
 }
