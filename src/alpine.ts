@@ -68,7 +68,7 @@ Alpine.store("result", {
       }, {} as Record<DieType, number>)
     )
       .map(([type, count]) => `${count}${type}`)
-      .join(", ")
+      .join("+")
       .toLowerCase();
   },
 } as AlpineResult);
