@@ -12,6 +12,8 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
+/* TODO: Temp */
+  background: #2f2f2f
 }
 
 canvas {

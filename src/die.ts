@@ -173,6 +173,7 @@ export class DieRoller {
 
   private waitForResults(onComplete: (results: DiceRollResult) => unknown) {
     const rollResults: { [index: number]: number } = {};
+    let timeout: number;
     // let intervalId: number;
     const diceResultFn = () => {
       for (let die of this.dice) {
@@ -213,9 +214,14 @@ export class DieRoller {
         // console.log("Cancelling render loop");
         // window.clearInterval(intervalId);
         this.engine.stopRenderLoop(diceResultFn);
+        window.clearTimeout(timeout);
       }
     };
     // intervalId = window.setInterval(diceResultFn, 1000);
     this.engine.runRenderLoop(diceResultFn);
+    timeout = window.setTimeout(() => {
+      console.warn("Timed out waiting for results (15s)");
+      this.engine.stopRenderLoop(diceResultFn);
+    }, 15000);
   }
 }

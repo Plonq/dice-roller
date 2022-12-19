@@ -22,9 +22,14 @@ export const DieType = {
 export type DieType = keyof typeof DieType;
 
 // export type DiceRoll = { [key in DieType]?: number };
-export type DiceRoll = Record<DieType, number>;
+export type RollType = "normal" | "adv" | "dis";
+export type DiceRoll = {
+  type: RollType;
+  rolls: Record<DieType, number>;
+};
 
 export interface DiceRollResult {
+  type?: RollType;
   total: number;
   rolls: { type: DieType; num: number }[];
 }

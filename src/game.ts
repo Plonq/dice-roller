@@ -29,6 +29,7 @@ export class Game {
     [name: string]: { model: Mesh; collider: Mesh };
   } = {};
   private shadowGenerator: ShadowGenerator | undefined;
+  private paused = true;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -59,7 +60,9 @@ export class Game {
 
     // run the main render loop
     engine.runRenderLoop(() => {
-      scene.render();
+      if (!this.paused) {
+        scene.render();
+      }
     });
 
     this.engine = engine;
@@ -261,23 +264,26 @@ export class Game {
     positionWalls(topWall, leftWall, rightWall, bottomWall);
   }
 
-  public async roll(rolls: DiceRoll) {
+  public async roll(roll: DiceRoll): Promise<DiceRollResult> {
     if (!this.ready) {
       throw new Error("Must call init() before any other method");
     }
 
+    this.paused = false;
     this.clear();
 
     return new Promise<DiceRollResult>((resolve, _reject) => {
       const dice: Die[] = [];
-      for (let [type, count] of Object.entries(rolls)) {
+      console.log("Rull", roll);
+      for (let [type, count] of Object.entries(roll.rolls)) {
         for (let i = 0; i < count; i++) {
           dice.push(this.spawnDie(type as DieType, i));
         }
       }
       new DieRoller(dice, this.engine!, this.scene!, (results) => {
         // console.log("FINAL RESULTS:", results);
-        resolve(results);
+        this.paused = true;
+        resolve({ type: roll.type, ...results });
       });
     });
   }

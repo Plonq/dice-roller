@@ -1,5 +1,5 @@
 import Alpine from "alpinejs";
-import { DiceRollResult, DieType } from "./model";
+import { DiceRollResult, DieType, RollType } from "./model";
 import { Alpine as AlpineType } from "alpinejs";
 
 declare global {
@@ -14,9 +14,11 @@ export interface AlpineResult {
   toggle: () => any;
   addResult: (result: DiceRollResult) => any;
   getResult: (index: number) => DiceRollResult;
+  removeResult: (index: number) => any;
   clearResult: () => any;
-  sumString: (index: number) => string;
-  diceString: (index: number) => string;
+  line1Str: (index: number) => string;
+  line2Str: (index: number) => string;
+  totalStr: (index: number) => string;
 }
 Alpine.store("result", {
   visible: false,
@@ -42,40 +44,98 @@ Alpine.store("result", {
   getResult(index: number) {
     return this.results[index];
   },
+  removeResult(index: number) {
+    this.results.splice(index, 1);
+    if (this.results.length <= 0) {
+      this.visible = false;
+    }
+  },
   clearResult() {
     this.results = [];
     this.visible = false;
   },
-  sumString(index: number) {
+  line1Str(index: number) {
     const result = this.results[index];
     if (!result) {
       return "";
     }
-    return result.rolls.map((res) => res.num).join("+");
+    switch (result.type) {
+      case "adv":
+        return "Advantage";
+      case "dis":
+        return "Disadvantage";
+      case "normal":
+      default:
+        return result.rolls.map((res) => res.num).join("+");
+    }
   },
-  diceString(index: number) {
+  line2Str(index: number) {
     const result = this.results[index];
     if (!result) {
       return "";
     }
-    return Object.entries(
-      result.rolls.reduce((collect, res) => {
-        if (!(res.type in collect)) {
-          collect[res.type] = 0;
+
+    const advDisStr = (rolls: number[], adv = true) => {
+      if (rolls[0] === rolls[1]) {
+        return `${rolls[0]} = ${rolls[1]}`;
+      } else {
+        if (adv) {
+          return `${Math.max(...rolls)} > ${Math.min(...rolls)}`;
+        } else {
+          return `${Math.min(...rolls)} < ${Math.max(...rolls)}`;
         }
-        collect[res.type] += 1;
-        return collect;
-      }, {} as Record<DieType, number>)
-    )
-      .map(([type, count]) => `${count}${type}`)
-      .join("+")
-      .toLowerCase();
+      }
+    };
+
+    switch (result.type) {
+      case "adv":
+        return advDisStr(
+          result.rolls.map((r) => r.num),
+          true
+        );
+      case "dis":
+        return advDisStr(
+          result.rolls.map((r) => r.num),
+          false
+        );
+      case "normal":
+      default:
+        return Object.entries(
+          result.rolls.reduce((collect, res) => {
+            if (!(res.type in collect)) {
+              collect[res.type] = 0;
+            }
+            collect[res.type] += 1;
+            return collect;
+          }, {} as Record<DieType, number>)
+        )
+          .map(([type, count]) => `${count}${type}`)
+          .join("+")
+          .toLowerCase();
+    }
+  },
+  totalStr(index: number) {
+    const result = this.results[index];
+    if (!result) {
+      return "";
+    }
+
+    switch (result.type) {
+      case "adv":
+        return Math.max(...result.rolls.map((r) => r.num));
+      case "dis":
+        return Math.min(...result.rolls.map((r) => r.num));
+      case "normal":
+      default:
+        return result.total.toString();
+    }
   },
 } as AlpineResult);
 
 // Roll Buttons
 Alpine.data("rolls", () => ({
   open: false,
+  type: "normal" as RollType,
   rolls: {
     d20: 0,
     d12: 0,
@@ -85,11 +145,13 @@ Alpine.data("rolls", () => ({
     d4: 0,
   },
 
-  toggle() {
-    this.open = !this.open;
-    if (!this.open) {
-      this.reset();
-    }
+  show() {
+    this.open = true;
+  },
+  hide() {
+    this.open = false;
+    this.reset();
+    this.type = "normal";
   },
   reset() {
     this.rolls.d20 = 0;
@@ -110,9 +172,21 @@ Alpine.data("rolls", () => ({
       0
     );
   },
-  roll() {
-    this.$dispatch("roll", this.rolls);
+  rollAdv() {
+    this.type = "adv";
     this.reset();
+    this.rolls.d20 = 2;
+    this.roll();
+  },
+  rollDis() {
+    this.type = "dis";
+    this.reset();
+    this.rolls.d20 = 2;
+    this.roll();
+  },
+  roll() {
+    this.$dispatch("roll", { type: this.type, rolls: this.rolls });
+    this.hide();
   },
 }));
 

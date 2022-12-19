@@ -16,11 +16,10 @@ export class App {
     this.enableDebugHotkey();
 
     window.addEventListener("roll", (event: Event) => {
-      const e = event as CustomEvent;
-      console.log("Rolling with...", e.detail);
+      const diceRoll = (event as CustomEvent).detail as DiceRoll;
+      console.log("Rolling with...", diceRoll);
 
-      // this.clearResult();
-      this.roll(e.detail);
+      this.roll(diceRoll);
     });
 
     // setTimeout(() => {
