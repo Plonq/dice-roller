@@ -59,21 +59,6 @@ Alpine.store("result", {
     if (!result) {
       return "";
     }
-    switch (result.type) {
-      case "adv":
-        return "Advantage";
-      case "dis":
-        return "Disadvantage";
-      case "normal":
-      default:
-        return result.rolls.map((res) => res.num).join("+");
-    }
-  },
-  line2Str(index: number) {
-    const result = this.results[index];
-    if (!result) {
-      return "";
-    }
 
     const advDisStr = (rolls: number[], adv = true) => {
       if (rolls[0] === rolls[1]) {
@@ -98,6 +83,22 @@ Alpine.store("result", {
           result.rolls.map((r) => r.num),
           false
         );
+      case "normal":
+      default:
+        return result.rolls.map((res) => res.num).join("+");
+    }
+  },
+  line2Str(index: number) {
+    const result = this.results[index];
+    if (!result) {
+      return "";
+    }
+
+    switch (result.type) {
+      case "adv":
+        return "Advantage";
+      case "dis":
+        return "Disadvantage";
       case "normal":
       default:
         return Object.entries(
