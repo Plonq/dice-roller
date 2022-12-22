@@ -18,16 +18,14 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
-import { Die, DieRoller } from "./die";
-import { DiceRoll, DiceRollResult, DieType } from "./model";
+import { D10, D100, D12, D20, D6, D8, D4, Die, DieRoller } from "./die";
+import { DiceRoll, DiceRollResult, DieType, DiceMeshStore } from "./model";
 
 export class Game {
   private readonly canvas: HTMLCanvasElement;
   private engine: Engine | undefined;
   private scene: Scene | undefined;
-  private diceMeshes: {
-    [name: string]: { model: Mesh; collider: Mesh };
-  } = {};
+  private diceMeshes: DiceMeshStore = {};
   private shadowGenerator: ShadowGenerator | undefined;
   private paused = true;
 
@@ -281,7 +279,7 @@ export class Game {
         }
       }
       new DieRoller(dice, this.engine!, this.scene!, (results) => {
-        // console.log("FINAL RESULTS:", results);
+        console.log("FINAL RESULTS:", results);
         this.paused = true;
         resolve({ type: roll.type, ...results });
       });
@@ -289,14 +287,28 @@ export class Game {
   }
 
   private spawnDie(type: DieType, id: number) {
-    const { modelInstance, colliderInstance } = this.createInstance(type, id);
-    return new Die(
-      type,
-      modelInstance,
-      colliderInstance,
-      this.shadowGenerator!,
-      this.scene!
-    );
+    // const { modelInstance, colliderInstance } = this.createInstance(type, id);
+    switch (type) {
+      case "d4":
+        return new D4(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d6":
+        return new D6(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d8":
+        return new D8(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d10":
+        return new D10(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d12":
+        return new D12(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d20":
+        return new D20(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
+      case "d100":
+        return new D100(
+          id,
+          this.diceMeshes,
+          this.shadowGenerator!,
+          this.scene!
+        );
+    }
   }
 
   public async clear() {
@@ -305,16 +317,6 @@ export class Game {
     )) {
       mesh.dispose();
     }
-  }
-
-  private createInstance(typeKey: string, id: string | number) {
-    const modelInstance = this.diceMeshes[typeKey].model.createInstance(
-      `${typeKey}_modelInstance${id}`
-    );
-    const colliderInstance = this.diceMeshes[typeKey].collider.createInstance(
-      `${typeKey}_colliderInstance${id}`
-    );
-    return { modelInstance, colliderInstance };
   }
 
   public toggleDebugLayer() {

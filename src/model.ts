@@ -10,6 +10,8 @@
 
 // export type DieType = "d4" | "d6" | "d8" | "d10" | "d12" | "d20";
 // export const DieTypes = ["d4", "d6", "d8", "d10", "d12", "d20"];
+import { Mesh } from "@babylonjs/core";
+
 export const DieType = {
   d4: "d4",
   d6: "d6",
@@ -17,6 +19,7 @@ export const DieType = {
   d10: "d10",
   d12: "d12",
   d20: "d20",
+  d100: "d100",
 } as const;
 
 export type DieType = keyof typeof DieType;
@@ -32,4 +35,8 @@ export interface DiceRollResult {
   type?: RollType;
   total: number;
   rolls: { type: DieType; num: number }[];
+}
+
+export interface DiceMeshStore {
+  [name: string]: { model: Mesh; collider: Mesh };
 }

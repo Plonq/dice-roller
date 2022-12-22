@@ -138,6 +138,7 @@ Alpine.data("rolls", () => ({
   open: false,
   type: "normal" as RollType,
   rolls: {
+    d100: 0,
     d20: 0,
     d12: 0,
     d10: 0,
@@ -164,7 +165,8 @@ Alpine.data("rolls", () => ({
   },
   canRoll() {
     return (
-      this.rolls.d20 +
+      this.rolls.d100 +
+        this.rolls.d20 +
         this.rolls.d12 +
         this.rolls.d10 +
         this.rolls.d8 +

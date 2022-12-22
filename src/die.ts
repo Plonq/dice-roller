@@ -8,38 +8,57 @@ import {
   ShadowGenerator,
   Vector3,
 } from "@babylonjs/core";
-import faceMaps from "./side-map";
-import { DiceRollResult, DieType } from "./model";
+import { DiceMeshStore, DiceRollResult, DieType } from "./model";
 import { Utils } from "./utils";
 
-export class Die {
-  public rootMesh: AbstractMesh;
-  public colliderMesh: AbstractMesh;
-  public atRestFor: number = 0;
-  public type: DieType;
+export abstract class Die {
+  protected id: number;
+  protected meshStore: DiceMeshStore;
+  protected shadowGenerator: ShadowGenerator;
+  protected scene: Scene;
+  protected root: AbstractMesh | undefined;
+  protected model: AbstractMesh | undefined;
+  protected collider: AbstractMesh | undefined;
 
-  constructor(
-    type: DieType,
-    model: AbstractMesh,
-    collider: AbstractMesh,
+  abstract type: DieType;
+  abstract sideMap: number[];
+
+  atRestFor: number = 0;
+
+  protected constructor(
+    id: number,
+    meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
   ) {
-    this.type = type;
-    collider.isVisible = false;
-    this.colliderMesh = collider;
-    const newRoot: Mesh = new Mesh(`i_${type}`, scene);
-    newRoot.addChild(model);
-    newRoot.addChild(collider);
+    this.id = id;
+    this.meshStore = meshStore;
+    this.shadowGenerator = shadowGenerator;
+    this.scene = scene;
+  }
+
+  init() {
+    const { model, collider } = this.createInstances(this.meshStore, this.id);
+    this.model = model;
+    this.collider = collider;
+    this.root = new Mesh(`i_${this.type}`, this.scene);
+    this.collider.isVisible = false;
+    this.root.addChild(this.model);
+    this.root.addChild(this.collider);
+
     const imposterType =
       this.type === "d6"
         ? PhysicsImpostor.BoxImpostor
         : PhysicsImpostor.ConvexHullImpostor;
-    collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
-      mass: 0,
-    });
-    newRoot.physicsImpostor = new PhysicsImpostor(
-      newRoot,
+    this.collider.physicsImpostor = new PhysicsImpostor(
+      this.collider,
+      imposterType,
+      {
+        mass: 0,
+      }
+    );
+    this.root.physicsImpostor = new PhysicsImpostor(
+      this.root,
       PhysicsImpostor.NoImpostor,
       {
         mass: 50,
@@ -48,21 +67,30 @@ export class Die {
         damping: 500,
       }
     );
-    this.rootMesh = newRoot;
-    shadowGenerator?.addShadowCaster(model, true);
-    shadowGenerator?.addShadowCaster(collider!, true);
+
+    this.shadowGenerator?.addShadowCaster(this.model, true);
+  }
+
+  protected createInstances(meshStore: DiceMeshStore, id: string | number) {
+    const model = meshStore[this.type].model.createInstance(
+      `${this.type}_modelInstance${id}`
+    );
+    const collider = meshStore[this.type].collider.createInstance(
+      `${this.type}_colliderInstance${id}`
+    );
+    return { model, collider };
   }
 
   public setPosition(position: Vector3) {
-    this.rootMesh.position = position;
+    this.root!.position = position;
   }
 
   public setRotation(rotation: Quaternion) {
-    this.rootMesh.rotationQuaternion = rotation;
+    this.root!.rotationQuaternion = rotation;
   }
 
   public setVelocity(velocity: Vector3) {
-    this.rootMesh.physicsImpostor?.setLinearVelocity(velocity);
+    this.root!.physicsImpostor?.setLinearVelocity(velocity);
   }
 
   public jiggle() {
@@ -72,12 +100,10 @@ export class Die {
   }
 
   public updateAtRest(deltaTime: number) {
-    const linearVelSq = this.rootMesh.physicsImpostor
-      ?.getLinearVelocity()
-      ?.lengthSquared();
-    const angularVelSq = this.rootMesh.physicsImpostor
-      ?.getAngularVelocity()
-      ?.lengthSquared();
+    const linearVelSq =
+      this.root!.physicsImpostor?.getLinearVelocity()?.lengthSquared();
+    const angularVelSq =
+      this.root!.physicsImpostor?.getAngularVelocity()?.lengthSquared();
     if (
       angularVelSq &&
       angularVelSq < 0.01 &&
@@ -91,12 +117,10 @@ export class Die {
   }
 
   public calculateResult() {
-    for (let i = 0; i < this.colliderMesh.getFacetLocalNormals().length; i++) {
-      if (
-        Vector3.Dot(this.colliderMesh.getFacetNormal(i), Vector3.Up()) > 0.999
-      ) {
+    for (let i = 0; i < this.collider!.getFacetLocalNormals().length; i++) {
+      if (Vector3.Dot(this.collider!.getFacetNormal(i), Vector3.Up()) > 0.999) {
         // @ts-ignore
-        const result = faceMaps[this.type][i];
+        const result = this.sideMap[i];
         if (result) {
           return result;
         } else {
@@ -106,9 +130,126 @@ export class Die {
     }
     return null;
   }
+}
 
-  convertToStaticObject() {
-    this.rootMesh.physicsImpostor?.setMass(0);
+export class D4 extends Die {
+  type: DieType;
+  sideMap: number[] = [4, 3, 2, 1];
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d4";
+    this.init();
+  }
+}
+
+export class D6 extends Die {
+  type: DieType;
+  sideMap: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [num, num]);
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d6";
+    this.init();
+  }
+}
+
+export class D8 extends Die {
+  type: DieType;
+  sideMap: number[] = [2, 7, 6, 3, 5, 4, 1, 8];
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d8";
+    this.init();
+  }
+}
+
+export class D10 extends Die {
+  type: DieType;
+  sideMap: number[] = [9, 1, 5, 7, 3, 2, 6, 4, 10, 8].flatMap((num) => [
+    num,
+    num,
+  ]);
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d10";
+    this.init();
+  }
+}
+
+export class D12 extends Die {
+  type: DieType;
+  sideMap: number[] = [2, 9, 12, 7, 3, 8, 10, 6, 5, 1, 4, 11].flatMap((num) => [
+    num,
+    num,
+    num,
+  ]);
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d12";
+    this.init();
+  }
+}
+
+export class D20 extends Die {
+  type: DieType;
+  sideMap: number[] = [
+    12, 10, 2, 20, 8, 17, 15, 18, 14, 16, 7, 5, 4, 6, 3, 1, 13, 11, 9, 19,
+  ];
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d20";
+    this.init();
+  }
+}
+
+export class D100 extends Die {
+  type: DieType;
+  sideMap: number[] = []; // TODO
+
+  constructor(
+    id: number,
+    meshStore: DiceMeshStore,
+    shadowGenerator: ShadowGenerator,
+    scene: Scene
+  ) {
+    super(id, meshStore, shadowGenerator, scene);
+    this.type = "d4";
+    this.init();
   }
 }
 
