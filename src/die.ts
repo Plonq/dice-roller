@@ -21,7 +21,7 @@ export abstract class Die {
   protected collider: AbstractMesh | undefined;
 
   abstract type: DieType;
-  abstract sideMap: number[];
+  abstract meshFaceIndexToNumMap: number[];
 
   atRestFor: number = 0;
 
@@ -123,7 +123,7 @@ export abstract class Die {
     for (let i = 0; i < this.collider!.getFacetLocalNormals().length; i++) {
       if (Vector3.Dot(this.collider!.getFacetNormal(i), Vector3.Up()) > 0.999) {
         // @ts-ignore
-        const result = this.sideMap[i];
+        const result = this.meshFaceIndexToNumMap[i];
         if (result) {
           return result;
         } else {
@@ -137,7 +137,7 @@ export abstract class Die {
 
 export class D4 extends Die {
   type: DieType;
-  sideMap: number[] = [4, 3, 2, 1];
+  meshFaceIndexToNumMap: number[] = [4, 3, 2, 1];
 
   constructor(
     id: string,
@@ -153,7 +153,10 @@ export class D4 extends Die {
 
 export class D6 extends Die {
   type: DieType;
-  sideMap: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [num, num]);
+  meshFaceIndexToNumMap: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [
+    num,
+    num,
+  ]);
 
   constructor(
     id: string,
@@ -169,7 +172,7 @@ export class D6 extends Die {
 
 export class D8 extends Die {
   type: DieType;
-  sideMap: number[] = [2, 7, 6, 3, 5, 4, 1, 8];
+  meshFaceIndexToNumMap: number[] = [2, 7, 6, 3, 5, 4, 1, 8];
 
   constructor(
     id: string,
@@ -185,10 +188,9 @@ export class D8 extends Die {
 
 export class D10 extends Die {
   type: DieType;
-  sideMap: number[] = [9, 1, 5, 7, 3, 2, 6, 4, 10, 8].flatMap((num) => [
-    num,
-    num,
-  ]);
+  meshFaceIndexToNumMap: number[] = [9, 1, 5, 7, 3, 2, 6, 4, 10, 8].flatMap(
+    (num) => [num, num]
+  );
 
   constructor(
     id: string,
@@ -204,11 +206,9 @@ export class D10 extends Die {
 
 export class D12 extends Die {
   type: DieType;
-  sideMap: number[] = [2, 9, 12, 7, 3, 8, 10, 6, 5, 1, 4, 11].flatMap((num) => [
-    num,
-    num,
-    num,
-  ]);
+  meshFaceIndexToNumMap: number[] = [
+    2, 9, 12, 7, 3, 8, 10, 6, 5, 1, 4, 11,
+  ].flatMap((num) => [num, num, num]);
 
   constructor(
     id: string,
@@ -224,7 +224,7 @@ export class D12 extends Die {
 
 export class D20 extends Die {
   type: DieType;
-  sideMap: number[] = [
+  meshFaceIndexToNumMap: number[] = [
     12, 10, 2, 20, 8, 17, 15, 18, 14, 16, 7, 5, 4, 6, 3, 1, 13, 11, 9, 19,
   ];
 
@@ -242,9 +242,9 @@ export class D20 extends Die {
 
 export class D100 extends Die {
   type: DieType;
-  sideMap: number[] = [70, 30, 50, 90, 10, 80, 100, 40, 60, 20].flatMap(
-    (num) => [num, num]
-  );
+  meshFaceIndexToNumMap: number[] = [
+    70, 30, 50, 90, 10, 80, 100, 40, 60, 20,
+  ].flatMap((num) => [num, num]);
   d10: D10;
 
   constructor(
