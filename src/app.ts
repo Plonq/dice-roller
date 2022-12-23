@@ -21,17 +21,6 @@ export class App {
 
       this.roll(diceRoll);
     });
-
-    // setTimeout(() => {
-    //   this.roll({
-    //     d20: 1,
-    //     d12: 1,
-    //     d10: 1,
-    //     d8: 1,
-    //     d6: 1,
-    //     d4: 1,
-    //   });
-    // }, 300);
   }
 
   enableDebugHotkey() {
@@ -40,16 +29,6 @@ export class App {
       if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.keyCode === 73) {
         this.game.toggleDebugLayer();
       }
-      // if (ev.key === "g") {
-      //   this.roll({
-      //     d20: 5,
-      //     d12: 5,
-      //     d10: 5,
-      //     d8: 5,
-      //     d6: 5,
-      //     d4: 5,
-      //   });
-      // }
     });
   }
 

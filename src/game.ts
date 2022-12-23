@@ -279,7 +279,7 @@ export class Game {
         }
       }
       new DieRoller(dice, this.engine!, this.scene!, (results) => {
-        console.log("FINAL RESULTS:", results);
+        // console.log("FINAL RESULTS:", results);
         this.paused = true;
         resolve({ type: roll.type, ...results });
       });
