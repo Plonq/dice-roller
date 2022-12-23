@@ -12,7 +12,7 @@ import { DiceMeshStore, DiceRollResult, DieType } from "./model";
 import { Utils } from "./utils";
 
 export abstract class Die {
-  protected id: number;
+  protected id: string;
   protected meshStore: DiceMeshStore;
   protected shadowGenerator: ShadowGenerator;
   protected scene: Scene;
@@ -26,7 +26,7 @@ export abstract class Die {
   atRestFor: number = 0;
 
   protected constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -37,28 +37,38 @@ export abstract class Die {
     this.scene = scene;
   }
 
-  init() {
-    const { model, collider } = this.createInstances(this.meshStore, this.id);
-    this.model = model;
-    this.collider = collider;
-    this.root = new Mesh(`i_${this.type}`, this.scene);
-    this.collider.isVisible = false;
-    this.root.addChild(this.model);
-    this.root.addChild(this.collider);
+  protected init() {
+    this.createInstances(this.meshStore, this.id);
 
+    this.root = new Mesh(`i_${this.type}`, this.scene);
+    this.collider!.isVisible = false;
+    this.root.addChild(this.model!);
+    this.root.addChild(this.collider!);
+
+    this.setupPhysics(this.root, this.collider!);
+
+    this.shadowGenerator?.addShadowCaster(this.model!, true);
+  }
+
+  protected createInstances(meshStore: DiceMeshStore, id: string | number) {
+    this.model = meshStore[this.type].model.createInstance(
+      `${this.type}_modelInstance${id}`
+    );
+    this.collider = meshStore[this.type].collider.createInstance(
+      `${this.type}_colliderInstance${id}`
+    );
+  }
+
+  protected setupPhysics(root: AbstractMesh, collider: AbstractMesh) {
     const imposterType =
       this.type === "d6"
         ? PhysicsImpostor.BoxImpostor
         : PhysicsImpostor.ConvexHullImpostor;
-    this.collider.physicsImpostor = new PhysicsImpostor(
-      this.collider,
-      imposterType,
-      {
-        mass: 0,
-      }
-    );
-    this.root.physicsImpostor = new PhysicsImpostor(
-      this.root,
+    collider.physicsImpostor = new PhysicsImpostor(collider, imposterType, {
+      mass: 0,
+    });
+    root.physicsImpostor = new PhysicsImpostor(
+      root,
       PhysicsImpostor.NoImpostor,
       {
         mass: 50,
@@ -67,39 +77,32 @@ export abstract class Die {
         damping: 500,
       }
     );
-
-    this.shadowGenerator?.addShadowCaster(this.model, true);
   }
 
-  protected createInstances(meshStore: DiceMeshStore, id: string | number) {
-    const model = meshStore[this.type].model.createInstance(
-      `${this.type}_modelInstance${id}`
-    );
-    const collider = meshStore[this.type].collider.createInstance(
-      `${this.type}_colliderInstance${id}`
-    );
-    return { model, collider };
-  }
-
-  public setPosition(position: Vector3) {
+  setPosition(position: Vector3) {
     this.root!.position = position;
   }
 
-  public setRotation(rotation: Quaternion) {
-    this.root!.rotationQuaternion = rotation;
+  setRandomRotation() {
+    this.root!.rotationQuaternion = new Quaternion(
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random()
+    );
   }
 
-  public setVelocity(velocity: Vector3) {
+  setVelocity(velocity: Vector3) {
     this.root!.physicsImpostor?.setLinearVelocity(velocity);
   }
 
-  public jiggle() {
+  jiggle() {
     this.setVelocity(
       new Vector3(Utils.randRange(0.5, 2), 0.1, Utils.randRange(0.5, 2))
     );
   }
 
-  public updateAtRest(deltaTime: number) {
+  updateAtRest(deltaTime: number) {
     const linearVelSq =
       this.root!.physicsImpostor?.getLinearVelocity()?.lengthSquared();
     const angularVelSq =
@@ -116,7 +119,7 @@ export abstract class Die {
     }
   }
 
-  public calculateResult() {
+  getTopFace() {
     for (let i = 0; i < this.collider!.getFacetLocalNormals().length; i++) {
       if (Vector3.Dot(this.collider!.getFacetNormal(i), Vector3.Up()) > 0.999) {
         // @ts-ignore
@@ -137,7 +140,7 @@ export class D4 extends Die {
   sideMap: number[] = [4, 3, 2, 1];
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -153,7 +156,7 @@ export class D6 extends Die {
   sideMap: number[] = [3, 2, 4, 5, 1, 6].flatMap((num) => [num, num]);
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -169,7 +172,7 @@ export class D8 extends Die {
   sideMap: number[] = [2, 7, 6, 3, 5, 4, 1, 8];
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -188,7 +191,7 @@ export class D10 extends Die {
   ]);
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -208,7 +211,7 @@ export class D12 extends Die {
   ]);
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -226,7 +229,7 @@ export class D20 extends Die {
   ];
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
@@ -239,17 +242,66 @@ export class D20 extends Die {
 
 export class D100 extends Die {
   type: DieType;
-  sideMap: number[] = []; // TODO
+  sideMap: number[] = [70, 30, 50, 90, 10, 80, 100, 40, 60, 20].flatMap(
+    (num) => [num, num]
+  );
+  d10: D10;
 
   constructor(
-    id: number,
+    id: string,
     meshStore: DiceMeshStore,
     shadowGenerator: ShadowGenerator,
     scene: Scene
   ) {
     super(id, meshStore, shadowGenerator, scene);
-    this.type = "d4";
+    this.type = "d100";
+    this.d10 = new D10(`${this.id}_1`, meshStore, shadowGenerator, scene);
     this.init();
+  }
+
+  override setPosition(position: Vector3) {
+    // Offsets position perpendicular to the vector pointing towards the center,
+    // (direction of roll) thereby moving the d100 and d10 dice away from each other.
+    const toOrigin = position.clone().set(position.x, 0, position.z);
+    let offsetVec = Vector3.Cross(toOrigin, Vector3.Up());
+    offsetVec.normalize();
+    offsetVec = offsetVec.multiplyByFloats(0.2, 0.2, 0.2);
+    const rootPos = position.add(offsetVec);
+    super.setPosition(rootPos);
+    this.d10.setPosition(position.subtract(offsetVec));
+  }
+
+  override setVelocity(velocity: Vector3) {
+    super.setVelocity(velocity);
+    this.d10.setVelocity(velocity);
+  }
+
+  override setRandomRotation() {
+    super.setRandomRotation();
+    this.d10.setRandomRotation();
+  }
+
+  override updateAtRest(deltaTime: number) {
+    super.updateAtRest(deltaTime);
+    this.d10.updateAtRest(deltaTime);
+    this.atRestFor = Math.min(this.atRestFor, this.d10.atRestFor);
+  }
+
+  override getTopFace(): number | null {
+    const tens = super.getTopFace();
+    const ones = this.d10.getTopFace();
+
+    if (tens === null || ones === null) {
+      return null;
+    }
+
+    // Make d100 0 - 90 and d10 0 - 9, which works for all cases except 100
+    // which is 00 0 on the dice, so we need to manually handle that.
+    let result = (tens % 100) + (ones % 10);
+    if (result === 0) {
+      result = 100;
+    }
+    return result;
   }
 }
 
@@ -296,19 +348,13 @@ export class DieRoller {
         );
         position = pick.pickedPoint!;
       }
+      // position = new Vector3(0.5, 0, -1.1);
       position.y = 1.3;
       die.setPosition(position);
       die.setVelocity(
         Vector3.Zero().subtract(position).multiplyByFloats(3, 3, 3)
       );
-      die.setRotation(
-        new Quaternion(
-          Math.random(),
-          Math.random(),
-          Math.random(),
-          Math.random()
-        )
-      );
+      die.setRandomRotation();
     }
   }
 
@@ -326,7 +372,7 @@ export class DieRoller {
           die.updateAtRest(this.scene.deltaTime);
           // console.log("updated rest value:", die.atRestFor);
           if (die.atRestFor > 250) {
-            const result = die.calculateResult();
+            const result = die.getTopFace();
             // console.log("resting, result is:", result);
             if (result) {
               rollResults[index] = result;

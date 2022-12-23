@@ -38,14 +38,16 @@ Alpine.store("result", {
     this.visible = !this.visible;
   },
   addResult(newResult: DiceRollResult) {
-    this.results.unshift(newResult);
+    // this.results.unshift(newResult);
+    this.results = [newResult, ...this.results];
     this.visible = true;
   },
   getResult(index: number) {
     return this.results[index];
   },
   removeResult(index: number) {
-    this.results.splice(index, 1);
+    // this.results.splice(index, 1);
+    this.results = this.results.filter((_r, i) => i !== index);
     if (this.results.length <= 0) {
       this.visible = false;
     }
@@ -156,6 +158,7 @@ Alpine.data("rolls", () => ({
     this.type = "normal";
   },
   reset() {
+    this.rolls.d100 = 0;
     this.rolls.d20 = 0;
     this.rolls.d12 = 0;
     this.rolls.d10 = 0;

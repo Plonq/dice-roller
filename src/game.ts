@@ -275,7 +275,7 @@ export class Game {
       console.log("Rull", roll);
       for (let [type, count] of Object.entries(roll.rolls)) {
         for (let i = 0; i < count; i++) {
-          dice.push(this.spawnDie(type as DieType, i));
+          dice.push(this.spawnDie(type as DieType, i.toString()));
         }
       }
       new DieRoller(dice, this.engine!, this.scene!, (results) => {
@@ -286,8 +286,7 @@ export class Game {
     });
   }
 
-  private spawnDie(type: DieType, id: number) {
-    // const { modelInstance, colliderInstance } = this.createInstance(type, id);
+  private spawnDie(type: DieType, id: string) {
     switch (type) {
       case "d4":
         return new D4(id, this.diceMeshes, this.shadowGenerator!, this.scene!);
