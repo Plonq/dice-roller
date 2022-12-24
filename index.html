@@ -35,7 +35,7 @@
             </button>
             <button
               class="bg-neutral-900 w-14 aspect-square rounded-full shadow relative"
-              x-on:click="rolls.d20 += 1"
+              x-on:click="addDie('d20')"
             >
               d20
               <template x-if="rolls.d20 > 0">

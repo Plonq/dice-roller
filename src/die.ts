@@ -74,8 +74,20 @@ export abstract class Die {
         mass: 50,
         restitution: 0,
         friction: 0.5,
-        damping: 500,
       }
+    );
+  }
+
+  get position() {
+    return this.root!.position;
+  }
+  set position(position: Vector3) {
+    this.root!.position = position;
+  }
+
+  dampen(amount: number) {
+    this.applyForce(
+      this.root?.physicsImpostor?.getLinearVelocity()?.negate().scale(amount)!
     );
   }
 
@@ -94,6 +106,10 @@ export abstract class Die {
 
   setVelocity(velocity: Vector3) {
     this.root!.physicsImpostor?.setLinearVelocity(velocity);
+  }
+
+  applyForce(force: Vector3) {
+    this.root!.physicsImpostor?.applyForce(force, this.position);
   }
 
   jiggle() {
@@ -306,19 +322,93 @@ export class D100 extends Die {
 }
 
 export class DieRoller {
-  dice: Die[];
-  private engine: Engine;
-  private scene: Scene;
+  protected dice: Die[] = [];
+  protected engine: Engine;
+  protected scene: Scene;
+  protected mode: "auto" | "manual" = "manual";
+  protected cursorDieMagnetFn: () => void = () => {};
 
-  constructor(
-    dice: Die[],
-    engine: Engine,
-    scene: Scene,
-    onComplete: (results: DiceRollResult) => unknown
-  ) {
-    this.dice = dice;
+  constructor(engine: Engine, scene: Scene) {
     this.engine = engine;
     this.scene = scene;
+
+    if (this.mode === "manual") {
+      this.setUpManual();
+    }
+  }
+
+  setMode(mode: "auto" | "manual") {
+    if (mode === "auto" && this.mode === "manual") {
+      this.mode = "auto";
+      this.tearDownManual();
+    } else if (mode === "manual" && this.mode === "auto") {
+      this.mode = "manual";
+      this.setUpManual();
+    }
+  }
+
+  protected setUpManual() {
+    this.cursorDieMagnetFn = () => {
+      // For each die...
+      for (let die of this.dice) {
+        // Accelerate it towards the mouse cursor a little bit
+        // with fixed Y coord
+        const pickPredicate = (mesh: AbstractMesh) => mesh.name === "ground"; // Only pick ground mesh
+        const mousePos = this.scene.pick(
+          this.scene.pointerX,
+          this.scene.pointerY,
+          pickPredicate
+        ).pickedPoint;
+        if (!mousePos) {
+          console.warn("mouse pick point is null");
+        } else {
+          mousePos.y = 1.3;
+
+          const vecToMouse = mousePos.subtract(die.position);
+          // vecToMouse.normalize();
+          // vecToMouse.scaleInPlace(1.5);
+          // console.log("applying force to die:", vecToMouse);
+          die.applyForce(vecToMouse.scale(2000));
+          die.dampen(300);
+          // die.position = die.position.add(vecToMouse);
+        }
+      }
+    };
+
+    this.engine.runRenderLoop(this.cursorDieMagnetFn);
+  }
+
+  protected tearDownManual() {
+    this.engine.stopRenderLoop(this.cursorDieMagnetFn);
+  }
+
+  setDice(dice: Die[]) {
+    this.dice = dice;
+  }
+
+  addDie(die: Die) {
+    if (this.mode === "manual") {
+      const pickPredicate = (mesh: AbstractMesh) => mesh.name === "ground"; // Only pick ground mesh
+      const mousePos = this.scene.pick(
+        this.scene.pointerX,
+        this.scene.pointerY,
+        pickPredicate
+      ).pickedPoint;
+      if (mousePos) {
+        mousePos.y = 3;
+        die.position = mousePos;
+      }
+    }
+    this.dice.push(die);
+  }
+
+  roll(onComplete: (results: DiceRollResult) => unknown) {
+    if (this.mode === "manual") {
+      throw new Error("DieRoller must be set to auto in order to call roll()");
+    }
+    if (!this.dice?.length) {
+      throw new Error("Must call setDice before calling roll on DieRoller");
+    }
 
     this.randomise();
     this.waitForResults(onComplete);

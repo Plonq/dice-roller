@@ -6,6 +6,7 @@ import {
   AmmoJSPlugin,
   ArcRotateCamera,
   AssetsManager,
+  CannonJSPlugin,
   Color4,
   DirectionalLight,
   Engine,
@@ -20,6 +21,9 @@ import {
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
 import { D10, D100, D12, D20, D6, D8, D4, Die, DieRoller } from "./die";
 import { DiceRoll, DiceRollResult, DieType, DiceMeshStore } from "./model";
+import * as CANNON from "cannon-es";
+
+let dieId = 0;
 
 export class Game {
   private readonly canvas: HTMLCanvasElement;
@@ -28,6 +32,7 @@ export class Game {
   private diceMeshes: DiceMeshStore = {};
   private shadowGenerator: ShadowGenerator | undefined;
   private paused = true;
+  private dieRoller: DieRoller | undefined;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -65,6 +70,7 @@ export class Game {
 
     this.engine = engine;
     this.scene = scene;
+    this.dieRoller = new DieRoller(engine, scene);
   }
 
   private async loadAssets(scene: Scene) {
@@ -108,8 +114,10 @@ export class Game {
 
     // Physics
     await (window as any).Ammo();
+    // window.CANNON = CANNON;
     const gravityVector = new Vector3(0, -24, 0);
     const physicsPlugin = new AmmoJSPlugin();
+    // const physicsPlugin = new CannonJSPlugin();
     scene.enablePhysics(gravityVector, physicsPlugin);
 
     // Environment
@@ -262,23 +270,30 @@ export class Game {
     positionWalls(topWall, leftWall, rightWall, bottomWall);
   }
 
-  public async roll(roll: DiceRoll): Promise<DiceRollResult> {
+  public async addDieToRoll(type: DieType) {
+    this.paused = false;
+    const die = this.spawnDie(type, (dieId++).toString());
+    this.dieRoller?.addDie(die);
+  }
+
+  public async autoRoll(roll: DiceRoll): Promise<DiceRollResult> {
     if (!this.ready) {
       throw new Error("Must call init() before any other method");
     }
 
     this.paused = false;
     this.clear();
+    this.dieRoller?.setMode("auto");
 
     return new Promise<DiceRollResult>((resolve, _reject) => {
       const dice: Die[] = [];
-      console.log("Rull", roll);
       for (let [type, count] of Object.entries(roll.rolls)) {
         for (let i = 0; i < count; i++) {
-          dice.push(this.spawnDie(type as DieType, i.toString()));
+          dice.push(this.spawnDie(type as DieType, (dieId++).toString()));
         }
       }
-      new DieRoller(dice, this.engine!, this.scene!, (results) => {
+      this.dieRoller?.setDice(dice);
+      this.dieRoller?.roll((results) => {
         // console.log("FINAL RESULTS:", results);
         this.paused = true;
         resolve({ type: roll.type, ...results });

@@ -21,6 +21,13 @@ export class App {
 
       this.roll(diceRoll);
     });
+
+    window.addEventListener("addDie", (event: Event) => {
+      // @ts-ignore
+      console.log("Adding die", event.detail);
+      // this.game.setRollType((event as CustomEvent).detail.type);
+      this.game.addDieToRoll((event as CustomEvent).detail.die);
+    });
   }
 
   enableDebugHotkey() {
@@ -33,7 +40,7 @@ export class App {
   }
 
   async roll(dice: DiceRoll) {
-    const result = await this.game.roll(dice);
+    const result = await this.game.autoRoll(dice);
 
     console.log("Result: ", result);
     this.alpineResult.addResult(result);

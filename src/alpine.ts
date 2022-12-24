@@ -178,6 +178,9 @@ Alpine.data("rolls", () => ({
       0
     );
   },
+  addDie(die: DieType) {
+    this.$dispatch("addDie", { type: this.type, die });
+  },
   rollAdv() {
     this.type = "adv";
     this.reset();
