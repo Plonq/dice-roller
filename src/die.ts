@@ -74,7 +74,6 @@ export abstract class Die {
         mass: 50,
         restitution: 0,
         friction: 0.5,
-        damping: 500,
       }
     );
   }
